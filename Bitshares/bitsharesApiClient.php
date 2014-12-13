@@ -15,8 +15,8 @@
  * limitations under the License.
  *
   This is a basic drop-in replacement for a subset of the Google API PHP Client
-  It should allow use of Bitshares based blockchain login in place of OAuth
-  allowing a relative straight forward port of any plugin that relies on the google api.
+  It should allow use of Bitshares based blockchain login in place of OAuth authentication,
+  allowing a relative straight forward port of any plugin that relies on the Google-Plus api.
  
   Previous code would have something like this.  The Service class is ignored and not implemented
 
@@ -42,7 +42,9 @@ if (! ini_get('date.timezone') && function_exists('date_default_timezone_set')) 
 $cwd = dirname(__FILE__);
 set_include_path("$cwd" . PATH_SEPARATOR . get_include_path());
 
-// TODO put the config.php back in ?
+// TODO put the config.php back in ... NO
+// We could add the configuration settings in there.  See BitsharesAdmin.php, then you can read them
+// Except we'd be better using modSettings so no reason to use config.php
 /*
 require_once "config.php";
 // If a local configuration file is found, merge it's values with the default configuration
@@ -54,7 +56,7 @@ if (file_exists($cwd . '/local_config.php')) {
 */
 
 
-
+// TODO fix this
 require_once "includes/easybitcoin.php";
 
 
@@ -80,7 +82,10 @@ private $userinfo = null;
 public function __construct($config = array()) {
     global $apiConfig,$modSettings;
 }
-
+/*
+SMF has some rule that enforces a valid email.  If auto is turned on, there is no email in the field so we need
+a function to create a junk placeholder OR figure out how to  disabled email TODO
+*/
 private function createRandomValidEmail() {
 
         $vowels = 'aeuy';
@@ -130,7 +135,7 @@ private function init_userinfo() {
 
 
       //  _GET has client_key,client_name,server_key,signed_secret
-      if (isset($_GET["client_key"])) {
+      if (isset($_GET["client_key"])) { // TODO what happens on the else ?
 
           //  inspect loginPackage .. has user_account_key  and shared_secret
           $loginPackage = $bitshares->wallet_login_finish($_REQUEST["server_key"], $_REQUEST["client_key"], $_REQUEST["signed_secret"]);

@@ -55,15 +55,16 @@ function bitshares_admin(){
 	    array('check', 'bts_app_enabled'),
 		array('check', 'bts_app_enabledautolog'),
 		'',
-		array('text', 'bts_app_client_id'),
-		array('text', 'bts_app_client_secret'),
+//		array('text', 'bts_app_client_id'),
+//		array('text', 'bts_app_client_secret'),
 		'',
-		array('text', 'bts_app_custon_logurl'),
+//		array('text', 'bts_app_custon_logurl'),
 		array('text', 'bts_app_custon_logimg'),
 		array('int', 'bts_app_detait_gid'),
+		array('int', 'bts_app_detait_gid2'),
 		array('select', 'bts_reg_auto', array($txt['bts_dfbregauto'],  $txt['bts_dfbregauto1'])),
-		'',
-		array('text', 'bts_app_board_showplus1'),	
+//		'',
+//		array('text', 'bts_app_board_showplus1'),	
 		
 	);	
 	
@@ -208,7 +209,7 @@ function bitshares_logs(){
 					'function' => create_function('$row', '
 						global $context, $txt, $scripturl;
 
-						return \'<a href="https://plus.google.com/\'.$row[\'btsid\'].\'" target="blank">\'.$txt[\'bts_app_logs5\'].\'</a>\';
+						return \'<a href="bts:\'.$row[\'btsid\'].\'" target="blank">\'.$txt[\'bts_app_logs5\'].\'</a>\';
 					'),
 					'style' => 'width: 3%; text-align: center;',
 				),

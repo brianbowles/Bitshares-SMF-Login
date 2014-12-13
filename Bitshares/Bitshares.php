@@ -245,6 +245,10 @@ function bitshares_connectAuto(){
         'check_email_ban' => false,
         'extra_register_vars' => array('id_group' => !empty($modSettings['bts_app_detait_gid']) ? $modSettings['bts_app_detait_gid'] : '0',),
     );
+    // ok if not registered on blockchain but it is bitshares login, try alt membergroup
+    if (isset($_SESSION['bitsharesdata']['bitsharesregistered']) && (! $_SESSION['bitsharesdata']['bitsharesregistered'] ) ) {
+	$regOptions['extra_register_vars'] = array('id_group' => !empty($modSettings['bts_app_detait_gid2']) ? $modSettings['bts_app_detait_gid2'] : '0',),
+    }
 
     require_once($sourcedir . '/Subs-Members.php');
     $memberID = registerMember($regOptions);
@@ -306,6 +310,10 @@ function bitshares_connect(){
             'check_email_ban' => false,
             'extra_register_vars' => array('id_group' => !empty($modSettings['bts_app_detait_gid']) ? $modSettings['bts_app_detait_gid'] : '0',),
         );
+    // ok if not registered on blockchain but it is bitshares login, try alt membergroup
+    if (isset($_SESSION['bitsharesdata']['bitsharesregistered']) && (! $_SESSION['bitsharesdata']['bitsharesregistered'] ) ) {
+	$regOptions['extra_register_vars'] = array('id_group' => !empty($modSettings['bts_app_detait_gid2']) ? $modSettings['bts_app_detait_gid2'] : '0',),
+    }
 
         require_once($sourcedir . '/Subs-Members.php');
         $memberID = registerMember($regOptions);
@@ -317,7 +325,7 @@ function bitshares_connect(){
 		    )
 	    );
 
-        // Ok this is a bit kludgy but we force update of the user image
+        // Ok this is a bit kludgy but we force update of the user image TODO break this off into a function and save/restore state
         require_once($sourcedir . '/Profile-Modify.php');
         $user_info['permissions'][] = 'profile_remote_avatar';
         $_POST['userpicpersonal'] = bitshares_robohashURL();

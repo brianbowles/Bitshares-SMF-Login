@@ -232,8 +232,8 @@ function bitshares_loadTheme(){
         }
     }
 }
-
-function template_bitshares_above(){ // TODO remove this .. This is that +1 shit
+/*
+hfunction template_bitshares_above(){ // TODO remove this .. This is that +1 shit
     global $context, $board, $modSettings, $scripturl;
 
 	$show_bitshares = explode(',', !empty($modSettings['bts_app_board_showplus1']) ? $modSettings['bts_app_board_showplus1'] : 0);
@@ -244,44 +244,44 @@ function template_bitshares_above(){ // TODO remove this .. This is that +1 shit
 }
 
 function template_bitshares_below(){}
-
+*/ 
 function bitshares_load(){
     global $boarddir;
 
     require_once($boarddir.'/Bitshares/Source/bitsharesApiClient.php');
 	
 }
+/*
+
+Sets the global variable authUrl that is created by the wallet via bitsahresApiClient
+*/
 
 function bitshares_init_auth_url(){
     global $authUrl;
 	
     bitshares_load();
     try { 	
-	    $client = new apiClient();
-	    //        $plus = new apiOauth2Service($client); // never referenced
+	$client = new apiClient();
         $authUrl = $client->createAuthUrl(); 
 	} 
 	catch (Exception $e) {
         $authUrl = '';
     }
 }
-
+/*
+This is the basic security test function
+*/
 
 function bitshares_init_auth(){
 
-
-
-
-    bitshares_load(); // just loads apiClient.php and apiOAuth2Servie.php out of bitsharesauth.. not needed?
-    //$client = new apiClient(); // this is google code.. not needed
-    //$oauth2 = new apiOauth2Service($client); // This is going to be put into one class...
+    bitshares_load();
 
     $client = new apiClient();
-    $oauth2 = $client;
+    $oauth2 = $client; // weird but an attempt to maintain backwards compat
 	
     //if (isset($_GET['code'])) {  // this is set after login redirect by google, code is the first token
     if (isset($_GET['signed_secret'])) {
-       $client->authenticate();
+       $client->authenticate(); // TODO MAKE SURE THIS IS CHECKED
        $_SESSION['token'] = $client->getAccessToken();
     }
     if (isset($_SESSION['token'])) {
@@ -289,7 +289,7 @@ function bitshares_init_auth(){
     }
 
     if ($client->getAccessToken()) {
-       $user = $client->userinfo_get();//$oauth2->userinfo->get();/* this puts a 10 element array into $user id,email,verifiedemail,name,givenname,faimlyname,link,picture, generic,locale */
+       $user = $client->userinfo_get();
        $_SESSION['token'] = $client->getAccessToken();
     }
 

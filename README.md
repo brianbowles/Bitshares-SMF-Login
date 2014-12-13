@@ -44,3 +44,11 @@ TODO -
 Fix the domain reference in loginredirect.php
 Look at token cookie and exceptions
 template_bitshares_above .. remove along with the other +1 references
+fix easybitcoin inclusion
+
+grep through looking for changes
+gplus/gp/google at the end
+TODO
+
+- potential TODO 
+remove settings to config wallet and put them in BitSharesAdmin.php and modsettings
