@@ -14,9 +14,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * This is a basic drop-in replacement for a subset of the Google API PHP Client
- * It should allow use of Bitshares based blockchain login in place of OAuth
- * allowig a relative straight forward port of any plugin that relies on the google api.
+  This is a basic drop-in replacement for a subset of the Google API PHP Client
+  It should allow use of Bitshares based blockchain login in place of OAuth
+  allowing a relative straight forward port of any plugin that relies on the google api.
+ 
+  Previous code would have something like this.  The Service class is ignored and not implemented
+
+  $client = new apiClient();
+  $oauth2 = new apiOauth2Service($client); // This is no longer used.
+
  */
 
 // Check for the required json and curl extensions, the Google API PHP Client won't function without them.
@@ -174,12 +180,19 @@ private function init_userinfo() {
         return (null == $token || 'null' == $token) ? null : $token;
     }
 
-
+/*
+This replaces code in the Services class that was migrated into the client class
+Original code was something like $oauth2->userinfo->get()
+*/
 
   public function userinfo_get() {
        return $this->userinfo;// this puts a 10 element array into $user id,email,verifiedemail,name,givenname,faimlyname,link,picture, generic,locale 
   }
+/*
+This is the code that calls the wallet to generate the authentication URL.
+That URL should be something like "bts://login ..." which will then load up the local wallet if the machine is configured properly
 
+*/
 
   public function createAuthUrl() {
 
@@ -205,3 +218,4 @@ private function init_userinfo() {
  }	
 
 
+}

@@ -24,13 +24,24 @@
  * ***** END LICENSE BLOCK ***** */
 if (!defined('SMF'))
 	die('Hacking attempt...');
+/*
 
+Called from: LogInOut.php, LogOut(), if the user is not a guest, after unsetting some session variables, but before clearing their entry in {db_prefix}log_online. They are, technically, still listed as online when the hook is called.
+Purpose: To initiate logout in integrated code.
+
+*/
 function bitshares_integrate_logout(){
 
     if(isset($_SESSION['token']))
 	    unset($_SESSION['token']);
 }
+/*
 
+If syncbts is set in the URL, update the db with the bitshares specific columns
+
+Called from: LogInOut.php, DoLogIn(), almost first instruction in the function - used during user actively logged in (session exists, more validating that than anything else) Register.php, Register2(), once registration is completed, just before setting up user cookie - so registration will log them in to both SMF and integrated app
+Purpose: To log user in on both integrated code and in SMF at the same time.
+*/
 function bitshares_integrate_login($user, $hashPasswd, $cookieTime){
 
     global $user_settings;
@@ -57,6 +68,13 @@ function bitshares_integrate_login($user, $hashPasswd, $cookieTime){
 	}
 }
 
+/*
+calls bitshares_init_auth_url() and then substitutes out the resulting text ..  
+This is the function that creates the button HTML
+
+Called from: Subs.php, during obExit, used to add functions to be run on the content prior to it being sent to the user, in the spirit of last-minute widespread content changes.
+
+*/
 function ob_bitshares(&$buffer){
     global $authUrl, $context, $modSettings, $txt;
 	
@@ -77,13 +95,29 @@ function ob_bitshares(&$buffer){
 	}
 	return $buffer;
 }
+/*
+This is called with /index.php?action=bitshares in the URL
 
+
+Called from: index.php, just after the creation of the action array
+Purpose: To allow add or remove actions from the action array.
+Accepts: 1 function name.
+
+*/
 function bitshares_actions(&$actionArray){
-$forum_version = 'SMF 2.0.9';
+    $forum_version = 'SMF 2.0.9';
 
     $actionArray['bitshares'] = array('Bitshares/Bitshares.php', 'Bitshares');
-}
 
+}
+/*
+
+
+integrate_admin_areas
+Called from: Admin.php, during AdminMain(), immediately after the default SMF admin areas have been defined.
+Purpose: To allow code to modify the admin menu, adding or removing areas, sections or subsections from it.
+
+*/
 function bitshares_admin_areas(&$admin_areas){
 	global $scripturl, $txt;
 	
@@ -110,7 +144,11 @@ function bitshares_admin_areas(&$admin_areas){
         );
     }
 }
+/*
 
+Called from: Profile.php, just after the definition of the default profile areas (i.e. the menu entries for the profile section)
+Purpose: allows add or modify the menu in the profile area
+*/
 function bitshares_profile_areas(&$profile_areas){
 	global $user_settings, $txt, $authUrl, $scripturl, $modSettings, $sc;
 
@@ -159,7 +197,11 @@ function bitshares_profile_areas(&$profile_areas){
 	    );
 	}
 }
+/*
 
+Called from: Load.php, at the end of loadTheme(), to load any information that potentially affects top level loading of the theme itself.
+Purpose: Designed to modify the layers to be loaded during page generation, for example to avoid calling the 'html' layer if the page is part of a CMS output (where there will already be a similar layer). Orstio expands on it a little more, covering off my initial theory that it was for exporting data to a CMS, rather than its actual use of pulling from.
+*/
 function bitshares_loadTheme(){
     global $modSettings, $user_info, $context;
 	
@@ -206,11 +248,8 @@ function template_bitshares_below(){}
 function bitshares_load(){
     global $boarddir;
 
-    require_once('bitsharesApiClient.php'); // ok so now apiClient should be our class
+    require_once($boarddir.'/Bitshares/Source/bitsharesApiClient.php');
 	
-//    require_once($boarddir.'/bitsharesauth/apiClient.php');
-//	require_once($boarddir.'/bitsharesauth/contrib/apiOauth2Service.php');
-
 }
 
 function bitshares_init_auth_url(){
