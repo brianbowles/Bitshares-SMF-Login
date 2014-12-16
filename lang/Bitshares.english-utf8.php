@@ -30,6 +30,17 @@ $helptxt['bts_app_custon_logimg'] = 'In this section you MUST enter a Bitshares 
 $helptxt['bts_app_enabled'] = 'Enable or disable BitShares mod from here';
 $helptxt['bts_app_enabledautolog'] = 'Will attempt to auto log the user into forum when hitting the login page if accounts are synced and session id is found';
 $helptxt['bts_reg_auto'] = 'Choose registration method auto or manual';
+
+$helptxt[ 'bts_app_wallet_server'] = 'This is the server that hosts the bitshares client.  Usually localhost';
+$helptxt[ 'bts_app_wallet_port'] = 'This is the httpd RPC port specified in the bitshares config file';
+$helptxt[ 'bts_app_wallet_user'] = 'This is the username needed to do RPC calls. It is specified in the bitshares client config file';
+$helptxt[ 'bts_app_wallet_pass'] = 'This is the password needed to do RPC calls. It is specified in the bitshares client config file';
+$helptxt[ 'bts_app_wallet_walletname'] = 'This is the wallet created that hosts the sites account';
+$helptxt[ 'bts_app_wallet_walletpass'] = 'This is the password to the wallet';
+$helptxt[ 'bts_app_wallet_site_account'] = 'This is the name registered on the blockchain that will show up as the site name during the authentication process';
+$helptxt[ 'bts_app_wallet_site_domain'] = 'This is the site domain.  Redundant from elsewhere.';
+
+
 $txt['bts_reg_auto'] = 'Registration Method';
 $txt['bts_dfbregauto1']  = 'Auto';
 $txt['bts_dfbregauto']  = 'Manual';
@@ -78,5 +89,15 @@ $txt['bts_app_logs4'] = 'Date Registered';
 $txt['bts_app_logs5'] = 'BitShares Profile';
 $txt['bts_app_logs6'] = 'Disassociate Selected';
 $txt['bts_app_logs7'] = 'Disassociate All';
+
+
+$txt[ 'bts_app_wallet_server'] = 'Wallet client server';
+$txt[ 'bts_app_wallet_port'] = 'Wallet client port';
+$txt[ 'bts_app_wallet_user'] = 'Wallet client RPC user';
+$txt[ 'bts_app_wallet_pass'] = 'Wallet client RPC password';
+$txt[ 'bts_app_wallet_walletname'] = 'Wallet Name';
+$txt[ 'bts_app_wallet_walletpass'] = 'Wallet Password';
+$txt[ 'bts_app_wallet_site_account'] = 'Blockchain Registered site account';
+$txt[ 'bts_app_wallet_site_domain'] = 'Site domain';
 
 ?>

@@ -232,19 +232,19 @@ function bitshares_loadTheme(){
         }
     }
 }
-/*
-hfunction template_bitshares_above(){ // TODO remove this .. This is that +1 shit
-    global $context, $board, $modSettings, $scripturl;
+
+function template_bitshares_above(){ // this function has to exist.. it is called
+/*    global $context, $board, $modSettings, $scripturl;
 
 	$show_bitshares = explode(',', !empty($modSettings['bts_app_board_showplus1']) ? $modSettings['bts_app_board_showplus1'] : 0);
 	if(in_array($board,$show_bitshares) && !empty($modSettings['bts_app_enabled']) && !empty($context['current_topic']) && !empty($_GET['topic']) && !empty($_GET['action']) != 'post'){
 	    echo '<g:plusone href="' . $scripturl . '?topic=' . $context['current_topic'] . '" size="medium"></g:plusone>
 	    <script type="text/javascript" src="http://apis.google.com/js/plusone.js"></script>'; // TODO remove this pluson stuff
-	}
+	} */
 }
 
 function template_bitshares_below(){}
-*/ 
+
 function bitshares_load(){
     global $boarddir;
 
@@ -262,7 +262,8 @@ function bitshares_init_auth_url(){
     bitshares_load();
     try { 	
 	$client = new apiClient();
-        $authUrl = $client->createAuthUrl(); 
+	$client->configInstance();
+    $authUrl = $client->createAuthUrl();
 	} 
 	catch (Exception $e) {
         $authUrl = '';
@@ -277,6 +278,7 @@ function bitshares_init_auth(){
     bitshares_load();
 
     $client = new apiClient();
+	$client->configInstance();	
     $oauth2 = $client; // weird but an attempt to maintain backwards compat
 	
     //if (isset($_GET['code'])) {  // this is set after login redirect by google, code is the first token

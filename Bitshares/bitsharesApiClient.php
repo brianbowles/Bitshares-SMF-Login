@@ -57,15 +57,14 @@ if (file_exists($cwd . '/local_config.php')) {
 
 
 // TODO fix this
-require_once "includes/easybitcoin.php";
+require_once "easybitcoin.php";
 
 
 class apiClient {
 
-
-private $RPC_SERVER_ADDRESS = "localhost";
 private $RPC_SERVER_PATH = "rpc";
 
+private $RPC_SERVER_ADDRESS = "localhost";
 private $RPC_SERVER_PORT = 57133;
 private $RPC_SERVER_USER = "sitetest";
 private $RPC_SERVER_PASS = "sitetestPW";
@@ -82,6 +81,24 @@ private $userinfo = null;
 public function __construct($config = array()) {
     global $apiConfig,$modSettings;
 }
+/*
+This should likely be a constructor ...
+
+*/
+public configInstance() {
+
+$this->RPC_SERVER_ADDRESS = $modSettings[ 'bts_app_wallet_server' ];
+$this->RPC_SERVER_PORT = $modSettings[ 'bts_app_wallet_port'];
+$this->RPC_SERVER_USER = $modSettings[ 'bts_app_wallet_user'];
+$this->RPC_SERVER_PASS = $modSettings[ 'bts_app_wallet_pass'];
+$this->RPC_SERVER_WALLET = $modSettings[ 'bts_app_wallet_walletname'];
+$this->RPC_SERVER_WALLET_PASS = $modSettings[ 'bts_app_wallet_walletpass'];
+$this->BITSHARES_USER_NAME = $modSettings[ 'bts_app_wallet_site_account'];
+$this->SITE_DOMAIN = $modSettings[ 'bts_app_wallet_site_domain'];
+
+}
+
+
 /*
 SMF has some rule that enforces a valid email.  If auto is turned on, there is no email in the field so we need
 a function to create a junk placeholder OR figure out how to  disabled email TODO

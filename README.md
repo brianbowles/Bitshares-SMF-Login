@@ -23,6 +23,7 @@ Add a rpc_user and rpc_password.  Turn enable to true.  Note the port number on 
 
 Run the client. Create a wallet and site account. Register the site account.
 
+Optional - lower the max amounts of connections for the wallet so lower server load.
 
 Go into Sources/Bitshares/bitsharesClientApi.php and edit the following .  
 
@@ -39,16 +40,24 @@ apt-get install php5-curl
 
 Inside Sources/includes make sure easybitcoin.php is installed - TODO clean this up
 
+----- Issues 
+The admin configuration seems to have refresh issues due to caching.  The values are saved internally but will not show up then the Save button is clicked until the cache expires.
+
+
+
 
 TODO -
 Fix the domain reference in loginredirect.php
 Look at token cookie and exceptions
-template_bitshares_above .. remove along with the other +1 references
-fix easybitcoin inclusion
+Create a bug report after verifying behavior of the behavior requireing loginredirect.php
 
 grep through looking for changes
-gplus/gp/google at the end
-TODO
+gplus/gp/google/error_log at the end
+
+TESTING LIST
+Make sure SSL works
+Make sure that you can not change the name when set to mamual login	
 
 - potential TODO 
 remove settings to config wallet and put them in BitSharesAdmin.php and modsettings
+remove the password fields from the manual login

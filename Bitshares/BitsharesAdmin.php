@@ -57,14 +57,22 @@ function bitshares_admin(){
 		'',
 //		array('text', 'bts_app_client_id'),
 //		array('text', 'bts_app_client_secret'),
-		'',
+//		'',
 //		array('text', 'bts_app_custon_logurl'),
 		array('text', 'bts_app_custon_logimg'),
 		array('int', 'bts_app_detait_gid'),
 		array('int', 'bts_app_detait_gid2'),
 		array('select', 'bts_reg_auto', array($txt['bts_dfbregauto'],  $txt['bts_dfbregauto1'])),
-//		'',
-//		array('text', 'bts_app_board_showplus1'),	
+		'',
+		array('text', 'bts_app_wallet_server'),
+		array('text', 'bts_app_wallet_port'),
+		array('text', 'bts_app_wallet_user'),
+		array('text', 'bts_app_wallet_pass'),
+		array('text', 'bts_app_wallet_walletname'),
+		array('text', 'bts_app_wallet_walletpass'),
+		array('text', 'bts_app_wallet_site_account'),
+		array('text', 'bts_app_wallet_site_domain'),
+		
 		
 	);	
 	

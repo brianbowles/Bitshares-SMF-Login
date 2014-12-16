@@ -32,11 +32,11 @@ function template_gppro() {
 	<div class="cat_bar"> 
 		<h3 class="catbg"> 
 			<span class="ie6_header floatleft">
-				'.$txt['gp_bitshares'].'
+				'.$txt['bts_bitshares'].'
 			</span> 
 		</h3> 
 	</div>';
-	echo'<p class="windowbg description">'.$txt['gp_app_profilegp'].'</p> 
+	echo'<p class="windowbg description">'.$txt['bts_app_profilegp'].'</p> 
 			<div class="windowbg2"> 
 				<span class="topslice"><span></span></span> 
 				<div class="content"> 
@@ -44,12 +44,12 @@ function template_gppro() {
 		   <dt>';
 			
 		echo' 
-				<dt><label for="impf">'.$txt['gp_app_profilegp3'].'<div class="smalltext">'.$txt['gp_app_profilegp1'].'</div></label></dt>
+				<dt><label for="impf">'.$txt['bts_app_profilegp3'].'<div class="smalltext">'.$txt['bts_app_profilegp1'].'</div></label></dt>
 					<dd>
-					<button type="button"  onclick="javascript:window.location.href = \''. $authUrl, '\';">'.$txt['gp_app_profilegp2'].'</button>
+					<button type="button"  onclick="javascript:window.location.href = \''. $authUrl, '\';">'.$txt['bts_app_profilegp2'].'</button>
 				</dd>
 			</dl><hr />
-		  <div align="center"><a href="'.$scripturl. '?action=bitshares;area=unsync;sesc='.$sc.'" onclick="return confirm(\''.$txt['gp_app_diso_account_confirm'].'\');">'.$txt['gp_app_diso_account'].'</a></div>
+		  <div align="center"><a href="'.$scripturl. '?action=bitshares;area=unsync;sesc='.$sc.'" onclick="return confirm(\''.$txt['bts_app_diso_account_confirm'].'\');">'.$txt['bts_app_diso_account'].'</a></div>
 		</div>
 				<span class="botslice"><span></span></span> 
 			</div> ';
@@ -64,7 +64,7 @@ global $txt, $scripturl, $context;
 		<span class="upperframe"><span></span></span>
 	        <div class="roundframe centertext">';
 				if(isset($_GET['nt'])){
-				     echo'<div class="error">'.$txt['gp_app_regonlyonce4'].' <strong>'.(!empty($_GET['u']) ? $_GET['u'] : '').'</strong> '.$txt['gp_app_regonlyonce5'].'</div><br />';
+				     echo'<div class="error">'.$txt['bts_app_regonlyonce4'].' <strong>'.(!empty($_GET['u']) ? $_GET['u'] : '').'</strong> '.$txt['bts_app_regonlyonce5'].'</div><br />';
 				}
 				echo'
 				<dl class="register_form" >
@@ -78,7 +78,7 @@ global $txt, $scripturl, $context;
 	    <span class="lowerframe"><span></span></span>
    </form>';
 }
-
+/* Print out user agreemet */
 function template_bitshares_agree()
 {
 	global $context, $scripturl, $txt;
@@ -99,7 +99,7 @@ function template_bitshares_agree()
 			<input type="hidden" name="accept_agreement" value="1" />
 		</form>';
 }
-
+/* This is the code that gives extra fields when login mode is set to maual. */
 function template_bitshares_cconnect() {
 global $txt, $scripturl, $context;
 
@@ -107,29 +107,29 @@ echo'<form action="'.$scripturl.'?action=bitshares;area=connect;register" method
 	   echo' 
 	               <div class="cat_bar">
 		              <h3 class="catbg">
-		                 '.$txt['gp_bitsharesreg'].'
+		                 '.$txt['bts_bitsharesreg'].'
 	                  </h3>
 				   </div>';
 				   
-				  echo'<div class="information centertext"><strong>'.$txt['gp_app_regonlyonce'].'</strong><br /><br />
+				  echo'<div class="information centertext"><strong>'.$txt['bts_app_regonlyonce'].'</strong><br /><br />
 	            <strong>
-	                  <div class="error">'.$txt['gp_app_regonlyonce1'].'<a href="'.$scripturl.'?action=bitshares;area=logsync"> '.$txt['gp_app_regonlyonce2'].'</a> '.$txt['gp_app_regonlyonce2'].'</div>
+	                  <div class="error">'.$txt['bts_app_regonlyonce1'].'<a href="'.$scripturl.'?action=bitshares;area=logsync"> '.$txt['bts_app_regonlyonce2'].'</a> '.$txt['bts_app_regonlyonce2'].'</div>
 	            </strong></div>';
 		
 		echo'<span class="upperframe"><span></span></span>
 	            <div class="roundframe centertext">';	   
        echo'<dl class="register_form" >
 				<dt>
-					<strong>'.$txt['gp_bitsharesreg1'].'</strong>
+					<strong>'.$txt['bts_bitsharesreg1'].'</strong>
 				</dt>
 				<dd>
-					<input type="text" name="real_name" value="" />
+				<input type="text" name="real_name" value="'.$_SESSION['gplusdata']['name'] .'" readonly="readonly" style="color:#888;" />
 				</dd>
 			</dl>';
 	  
 	  echo'<dl class="register_form" >
 			   <dt>
-				    <strong>'.$txt['gp_bitsharesreg2'].'</strong>
+				    <strong>'.$txt['bts_bitsharesreg2'].'</strong>
 			   </dt>
 			   <dd>
 					<input type="text" name="email" value="" />
@@ -138,7 +138,7 @@ echo'<form action="'.$scripturl.'?action=bitshares;area=connect;register" method
    
       echo'<dl class="register_form" >
 			   <dt>
-					<strong>'.$txt['gp_bitsharesreg3'].'</strong>
+					<strong>'.$txt['bts_bitsharesreg3'].'</strong>
 			   </dt>
 			   <dd>
 					<input type="password" name="passwrd1" value="" />
@@ -147,14 +147,14 @@ echo'<form action="'.$scripturl.'?action=bitshares;area=connect;register" method
 		   
       echo'<dl class="register_form" >
 			   <dt>
-					<strong>'.$txt['gp_bitsharesreg4'].'</strong>
+					<strong>'.$txt['bts_bitsharesreg4'].'</strong>
 			   </dt>
 			   <dd>
 					<input type="password" name="passwrd2" value="" />
 			   </dd>
 		   </dl>';
 		   
-		       echo'<input type="submit" name="submit" value="'.$txt['gp_bitsharesreg5'].'" />
+		       echo'<input type="submit" name="submit" value="'.$txt['bts_bitsharesreg5'].'" />
 			   <input type="hidden" name="accept_agreement" value="1" />';
 					
 	   echo'</div>
@@ -162,7 +162,7 @@ echo'<form action="'.$scripturl.'?action=bitshares;area=connect;register" method
 }
 
 function template_bitshares_log() {
-    template_show_list('gp_list');
+    template_show_list('bts_list');
 }
 
 ?>

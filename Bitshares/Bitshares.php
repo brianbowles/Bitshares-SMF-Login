@@ -247,7 +247,7 @@ function bitshares_connectAuto(){
     );
     // ok if not registered on blockchain but it is bitshares login, try alt membergroup
     if (isset($_SESSION['bitsharesdata']['bitsharesregistered']) && (! $_SESSION['bitsharesdata']['bitsharesregistered'] ) ) {
-	$regOptions['extra_register_vars'] = array('id_group' => !empty($modSettings['bts_app_detait_gid2']) ? $modSettings['bts_app_detait_gid2'] : '0',),
+	$regOptions['extra_register_vars'] = array('id_group' => !empty($modSettings['bts_app_detait_gid2']) ? $modSettings['bts_app_detait_gid2'] : '0',);
     }
 
     require_once($sourcedir . '/Subs-Members.php');
@@ -312,7 +312,7 @@ function bitshares_connect(){
         );
     // ok if not registered on blockchain but it is bitshares login, try alt membergroup
     if (isset($_SESSION['bitsharesdata']['bitsharesregistered']) && (! $_SESSION['bitsharesdata']['bitsharesregistered'] ) ) {
-	$regOptions['extra_register_vars'] = array('id_group' => !empty($modSettings['bts_app_detait_gid2']) ? $modSettings['bts_app_detait_gid2'] : '0',),
+	$regOptions['extra_register_vars'] = array('id_group' => !empty($modSettings['bts_app_detait_gid2']) ? $modSettings['bts_app_detait_gid2'] : '0',);
     }
 
         require_once($sourcedir . '/Subs-Members.php');
