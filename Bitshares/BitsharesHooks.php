@@ -248,7 +248,7 @@ function template_bitshares_below(){}
 function bitshares_load(){
     global $boarddir;
 
-    require_once($boarddir.'/Bitshares/Source/bitsharesApiClient.php');
+    require_once($boarddir.'/Sources/Bitshares/bitsharesApiClient.php');
 	
 }
 /*

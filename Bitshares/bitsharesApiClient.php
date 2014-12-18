@@ -85,7 +85,9 @@ public function __construct($config = array()) {
 This should likely be a constructor ...
 
 */
-public configInstance() {
+public function configInstance() {
+
+global $modSettings;
 
 $this->RPC_SERVER_ADDRESS = $modSettings[ 'bts_app_wallet_server' ];
 $this->RPC_SERVER_PORT = $modSettings[ 'bts_app_wallet_port'];
@@ -234,10 +236,6 @@ That URL should be something like "bts://login ..." which will then load up the 
 	 if (empty($loginStart) || $loginStart == 'null') {
 	    return false;
 	 }   
-	 return $loginStart . $SITE_DOMAIN."/loginredirect.php";
-	
-
- }	
-
-
+	 return $loginStart . $this->SITE_DOMAIN."/loginredirect.php";
+ }
 }

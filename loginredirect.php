@@ -23,7 +23,7 @@
     // really we should just not have btsxtalk.org in the absolute_url but im too lazy to fix a hack
 
 	// TODO fix this...  it is strange how we hacked this into working.. figure this out and submit bug report
-    $absolute_url =  str_replace("bitsharesnation.org/loginredirect.php?","index.php?action=gplus&",$absolute_url);
+    $absolute_url =  str_replace("bitsharesnation.org/loginredirect.php?","index.php?action=bitshares&",$absolute_url);
 
 //    error_log($absolute_url."\n", 3, "/tmp/php.log");
 
