@@ -88,7 +88,7 @@ function bitshares_main() {
 
     global $context, $sc, $user_info, $user_settings, $modSettings;
 
-    bitshares_init_auth(); // first pass this doesnt return and sets up the auth
+    $err = bitshares_init_auth(); // first pass this doesnt return and sets up the auth
     if (!empty($_SESSION['bitsharesdata']) && isset($_REQUEST['auth']) && $_REQUEST['auth'] == 'done') { // after first redirect enter this as auth is done
         $me = !empty($_SESSION['bitsharesdata']) ? $_SESSION['bitsharesdata'] : '';
         $_SESSION['bitshares']['id'] = $me['id'];
@@ -115,7 +115,8 @@ function bitshares_main() {
             }
         }
     } else {
-        fatal_lang_error('bts__app_error2', false); // This is Did you try to skip authorization?
+        setup_fatal_error_context($err); // we might leak wallet info here.. TODO wrap the boolean around this
+        //fatal_lang_error('bts__app_error2', false); // This is Did you try to skip authorization?
         
     }
 }
@@ -169,25 +170,57 @@ function bitshares_createRandomPassword($length = 8, $strength = 8) {
     return $password;
 }
 /*
+ * This is a kludge that uses the profile upload pic from remote server code that already exists in SMF
+ * So instead of writing my own code that would be fragile without understanding everything I kludged up
+ * environment and call the functionality that already exists to do this
+ */
+function synchRoboHash($memberID) {
+
+    global $context, $sourcedir, $modSettings, $user_info;
+
+    require_once ($sourcedir . '/Profile-Modify.php');
+
+    $user_info['permissions'][] = 'profile_remote_avatar';
+    $pushUPP = $_POST['userpicpersonal'];
+    $_POST['userpicpersonal'] = bitshares_robohashURL();
+    $tmp = 'external';
+    $pushContext = $context['id_member'];
+    $context['id_member'] = $memberID;
+    $pushMS = $modSettings['avatar_download_external'];
+    $modSettings['avatar_download_external'] = 1;
+
+    profileSaveAvatarData($tmp);
+
+    // ok restore/pop the variables that might possibly have side effects
+    $_POST['userpicpersonal'] = $pushUPP;
+    $context['id_member'] = $pushContext;
+    $modSettings['avatar_download_external'] = $pushMS;
+}
+
+/*
  * This is called on signup when the auto option is set.  The user will not be prompted for a password and email.  THe email will be something random.
  * This moves SESSION data from [bitsharesdata] to [bitshares], attempts to load the user, if it loads then it gives error else is registers.
 */
 function bitshares_connectAuto() {
     
-    global $modSettings, $sourcedir, $context, $user_info;
+    global $modSettings, $sourcedir;
     
     // So move SESSION bitsharesdata to bitshares .. WHY
     $gdata = !empty($_SESSION['bitsharesdata']) ? $_SESSION['bitsharesdata'] : '';
     $_SESSION['bitshares']['id'] = $gdata['id'];
     $_SESSION['bitshares']['name'] = $gdata['name'];
     $_SESSION['bitshares']['email'] = $gdata['email'];
+
     if (empty($gdata)) fatal_lang_error('bts__app_error3', false);
+
     $member_load = bitshares_loadUser($_SESSION['bitshares']['name'], 'real_name');
     if ($member_load['real_name']) { // add the nt which throws up a screen with a this user is already in db message
         redirectexit('action=bitshares;area=logsync;nt;u=' . $member_load['real_name'] . '');
     }
+
     $pass = bitshares_createRandomPassword();
     $regOptions = array('interface' => 'guest', 'auth_method' => 'password', 'username' => $_SESSION['bitshares']['name'], 'email' => $_SESSION['bitshares']['email'], 'require' => 'nothing', 'password' => $pass, 'password_check' => $pass, 'password_salt' => substr(md5(mt_rand()), 0, 4), 'send_welcome_email' => !empty($modSettings['send_welcomeEmail']), 'check_password_strength' => false, 'check_email_ban' => false, 'extra_register_vars' => array('id_group' => !empty($modSettings['bts_app_detait_gid']) ? $modSettings['bts_app_detait_gid'] : '0',),);
+
     // ok if not registered on blockchain but it is bitshares login, try alt membergroup
     if (isset($_SESSION['bitsharesdata']['bitsharesregistered']) && (!$_SESSION['bitsharesdata']['bitsharesregistered'])) {
         $regOptions['extra_register_vars'] = array('id_group' => !empty($modSettings['bts_app_detait_gid2']) ? $modSettings['bts_app_detait_gid2'] : '0',);
@@ -195,35 +228,36 @@ function bitshares_connectAuto() {
     require_once ($sourcedir . '/Subs-Members.php');
     $memberID = registerMember($regOptions);
     updateMemberData($memberID, array('btsid' => $_SESSION['bitshares']['id'], 'btsname' => $_SESSION['bitshares']['name'],));
-    // Ok this is a bit kludgy but we force update of the user image
-    require_once ($sourcedir . '/Profile-Modify.php');
-    $user_info['permissions'][] = 'profile_remote_avatar';
-    $_POST['userpicpersonal'] = bitshares_robohashURL();
-    $tmp = 'external';
-    $context['id_member'] = $memberID;
-    $modSettings['avatar_download_external'] = 1; // TODO is this a problem?  perhaps save and restore it
-    profileSaveAvatarData($tmp);
+
+    synchRoboHash($memberID);
     redirectexit('action=bitshares;auth=done');
 }
+
 /* If registration is set to manual and not auto then we call this ,
  * sets off registration agreement then after checking off goes here
  This is called before registration agreemeent, after registration agreement, after manual account info entry  */
 function bitshares_connect() {
     
-    global $modSettings, $sourcedir, $context, $user_info;
+    global $modSettings, $sourcedir, $context;
 
     $context['sub_template'] = 'bitshares_cconnect';
     $gdata = !empty($_SESSION['bitsharesdata']) ? $_SESSION['bitsharesdata'] : '';
     $_SESSION['bitshares']['id'] = $gdata['id'];
     $_SESSION['bitshares']['name'] = $gdata['name'];
+
     if (empty($gdata)) fatal_lang_error('bts__app_error3', false);
+
     bitshares_do_agree();
+
     if (isset($_REQUEST['register'])) {
         $member_load = bitshares_loadUser($_POST['real_name'], 'real_name');
         if ($member_load['real_name']) { // nt throws up screen telling user the user already exists
             redirectexit('action=bitshares;area=logsync;nt;u=' . $member_load['real_name'] . '');
         }
-        $regOptions = array('interface' => 'guest', 'auth_method' => 'password', 'username' => $_POST['real_name'], 'email' => $_POST['email'], 'require' => 'nothing', 'password' => !empty($_POST['passwrd1']) ? $_POST['passwrd1'] : '', 'password_check' => !empty($_POST['passwrd2']) ? $_POST['passwrd2'] : '', 'password_salt' => substr(md5(mt_rand()), 0, 4), 'send_welcome_email' => !empty($modSettings['send_welcomeEmail']), 'check_password_strength' => false, 'check_email_ban' => false, 'extra_register_vars' => array('id_group' => !empty($modSettings['bts_app_detait_gid']) ? $modSettings['bts_app_detait_gid'] : '0',),);
+        $pass = bitshares_createRandomPassword();
+        $user = $_SESSION['bitshares']['name'];
+
+        $regOptions = array('interface' => 'guest', 'auth_method' => 'password', 'username' => $user, 'email' => $_POST['email'], 'require' => 'nothing', 'password' => $pass, 'password_check' => $pass, 'password_salt' => substr(md5(mt_rand()), 0, 4), 'send_welcome_email' => !empty($modSettings['send_welcomeEmail']), 'check_password_strength' => false, 'check_email_ban' => false, 'extra_register_vars' => array('id_group' => !empty($modSettings['bts_app_detait_gid']) ? $modSettings['bts_app_detait_gid'] : '0',),);
         // ok if not registered on blockchain but it is bitshares login, try alt membergroup
         if (isset($_SESSION['bitsharesdata']['bitsharesregistered']) && (!$_SESSION['bitsharesdata']['bitsharesregistered'])) {
             $regOptions['extra_register_vars'] = array('id_group' => !empty($modSettings['bts_app_detait_gid2']) ? $modSettings['bts_app_detait_gid2'] : '0',);
@@ -231,14 +265,8 @@ function bitshares_connect() {
         require_once ($sourcedir . '/Subs-Members.php');
         $memberID = registerMember($regOptions);
         updateMemberData($memberID, array('btsid' => $_SESSION['bitshares']['id'], 'btsname' => $_SESSION['bitshares']['name'],));
-        // Ok this is a bit kludgy but we force update of the user image TODO break this off into a function and save/restore state
-        require_once ($sourcedir . '/Profile-Modify.php');
-        $user_info['permissions'][] = 'profile_remote_avatar';
-        $_POST['userpicpersonal'] = bitshares_robohashURL();
-        $tmp = 'external';
-        $context['id_member'] = $memberID;
-        $modSettings['avatar_download_external'] = 1; // TODO is this a problem?  perhaps save and restore it
-        profileSaveAvatarData($tmp);
+
+        synchRoboHash($memberID);
         redirectexit('action=bitshares;auth=done');
     }
 }

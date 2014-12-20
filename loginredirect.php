@@ -1,6 +1,5 @@
-<//-- This is a proof of concept web application for BitShares logins. -->
 <?PHP
-
+    // This is a hack to recreate the needed URL variables in the GET
 
     //This code adapted from http://stackoverflow.com/questions/6768793/get-the-full-url-in-php
     function url_origin($s, $use_forwarded_host=false)
@@ -17,15 +16,11 @@
     }
     $absolute_url = full_url($_SERVER);
 
-    error_log($absolute_url."\n", 3, "/tmp/php.log");
     // ok so location.href forces you to same domain.. so only concatenates the end...
-
-    // really we should just not have btsxtalk.org in the absolute_url but im too lazy to fix a hack
-
-	// TODO fix this...  it is strange how we hacked this into working.. figure this out and submit bug report
-    $absolute_url =  str_replace("bitsharesnation.org/loginredirect.php?","index.php?action=bitshares&",$absolute_url);
-
-//    error_log($absolute_url."\n", 3, "/tmp/php.log");
+    // So we strip out the domain + logindirect
+	// TODO fix this...  figure this out and submit bug report
+    // until then weve left hostname hardcoded to not load up the full smf context to read variables..
+    $absolute_url =  str_replace("192.168.0.66/loginredirect.php?","index.php?action=bitshares&",$absolute_url);
 
  ?>
 

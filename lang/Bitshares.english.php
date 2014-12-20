@@ -23,7 +23,8 @@
  *
  * ***** END LICENSE BLOCK ***** */
 global $helptxt;
-
+$helptxt['bts_app_register_unregistered'] = 'Setting this keeps users from having unregistered Bitshares accounts.  This enforces blockchain registration if there are too many spam accounts.  It also prevents people from faking accounts etc.';
+$helptxt['bts_app_printerrorsatfailure'] = 'If you want the error message reported to the main screen when the login authenticator is failing.  THis could be a possible security issue if the error messages ever leak account info.';
 $helptxt['bts_app_detait_gid'] = ' You may specify what membergroup new members that register with BitShares will belong to Use 0 to disable. Name a membergroup something like Bitshares Registered to signify registration on the blockchain';
 $helptxt['bts_app_detait_gid2'] = ' You may specify what membergroup new members that register with BitShares will belong to Use 0 to disable. Use this for accounts that are not registered on the blockchain to show this status.';
 $helptxt['bts_app_custon_logimg'] = 'In this section you MUST enter a Bitshares login image URL this will be the button guest click to login/register';
@@ -41,6 +42,8 @@ $helptxt[ 'bts_app_wallet_site_account'] = 'This is the name registered on the b
 $helptxt[ 'bts_app_wallet_site_domain'] = 'This is the site domain.  Redundant from elsewhere.';
 
 
+$txt['bts_app_register_unregistered'] = 'Allow reg. of Bitshares unregistered';
+$txt['bts_app_printerrorsatfailure'] = 'Print Bitshares Wallet Error';
 $txt['bts_reg_auto'] = 'Registration Method';
 $txt['bts_dfbregauto1']  = 'Auto';
 $txt['bts_dfbregauto']  = 'Manual';
@@ -53,7 +56,7 @@ $txt['bts_error_notgpemaile'] = 'We caught an exception <br /><strong>Error Code
 $txt['fb_loguid'] = 'User ID';
 $txt['bts_bitsharesreg'] ='BitShares Registration';
 $txt['bts_bitsharesreg1'] ='User Name';
-$txt['bts_bitsharesreg2'] ='Email';
+$txt['bts_bitsharesreg2'] ='Email - not verified but required';
 $txt['bts_bitsharesreg3'] ='Password';
 $txt['bts_bitsharesreg4'] ='Confirm Password';
 $txt['bts_bitsharesreg5'] ='Register';

@@ -70,7 +70,7 @@ Called from: Subs.php, during obExit, used to add functions to be run on the con
 */
 function ob_bitshares(&$buffer) {
 
-    global $authUrl, $context, $modSettings, $txt;
+    global $authUrl, $context, $modSettings, $txt,$g_authurl_error;
 
     if (empty($modSettings['bts_app_enabled']) || isset($_REQUEST['xml'])) 
        return $buffer;
@@ -78,12 +78,18 @@ function ob_bitshares(&$buffer) {
     if (!$context['user']['is_logged']) { // ok if user is not logged in, then lets create the login buttons at top
 
         bitshares_init_auth_url(); // authUrl is side effect /return of this
-
-        if ((empty($authUrl) || (!$authUrl))) { // empty doesnt catch false
-            return "";
+	// we also create g_authurl_error
+        if ((empty($authUrl) || (!$authUrl))) { 
+	        // change out the button with a span of the error
+            if ((!empty($modSettings['bts_app_printerrorsatfailure'])) && $modSettings['bts_app_printerrorsatfailure']) {
+                $buffer = preg_replace('~(' . preg_quote('<div class="info">' . $txt['guestnew'] . '</div>') . ')~', '<div>' . $g_authurl_error . '</div><div class="info">' . $txt['guestnew'] . '</div>', $buffer);
+            }
+            return $buffer; //lets not put a button up
         }
 
         $txt['guestnew'] = sprintf($txt['welcome_guest'], $txt['guest_title']);
+	
+	// one does frontpage, one is for the forgot password page.... third?
         $buffer = preg_replace('~(' . preg_quote('<div class="info">' . $txt['guestnew'] . '</div>') . ')~', '<a href="' . $authUrl . '"><img src="' . $modSettings['bts_app_custon_logimg'] . '" alt="" /></a><div class="info">' . $txt['guestnew'] . '</div>', $buffer);
         $buffer = preg_replace('~(' . preg_quote($txt['forgot_your_password'] . '</a></p>') . ')~', $txt['forgot_your_password'] . '</a></p><div align="center"><a href="' . $authUrl . '"><img src="' . $modSettings['bts_app_custon_logimg'] . '" alt="" /></a></div>', $buffer);
         $buffer = preg_replace('~(' . preg_quote('<dt><strong><label for="smf_autov_username">' . $txt['username'] . ':</label></strong></dt>') . ')~', '<dt><strong>' . $txt['bts_app_rwf'] . ':</strong><div class="smalltext">' . $txt['bts_app_regmay'] . '</div></dt><dd><a href="' . $authUrl . '"><img src="' . $modSettings['bts_app_custon_logimg'] . '" alt="" /></a></dd><dt><strong><label for="smf_autov_username">' . $txt['username'] . ':</label></strong></dt>', $buffer);
@@ -186,7 +192,7 @@ function bitshares_init_auth_url() {
     bitshares_load();
     try {
         $client = new apiClient();
-        $client->configInstance();
+        $client->configInstance_forSMF();
         $authUrl = $client->createAuthUrl();
     }
     catch(Exception $e) {
@@ -199,30 +205,35 @@ This is the basic security test function
 function bitshares_init_auth() {
 
     bitshares_load();
-    $client = new apiClient();
-    $client->configInstance();
-    $oauth2 = $client; // weird but an attempt to maintain backwards compat
 
-    //if (isset($_GET['code'])) {  // this is set after login redirect by google, code is the first token
-    if (isset($_GET['signed_secret'])) {
-        $client->authenticate(); // TODO MAKE SURE THIS IS CHECKED
-        $_SESSION['token'] = $client->getAccessToken();
-    }
-    if (isset($_SESSION['token'])) {
-        $client->setAccessToken($_SESSION['token']);
-    }
-    if ($client->getAccessToken()) {
-        $user = $client->userinfo_get();
-        $_SESSION['token'] = $client->getAccessToken();
-    }
+    try {
+        $client = new apiClient();
+        $client->configInstance_forSMF();
+        //$oauth2 = $client; // weird but an attempt to maintain backwards compat without 2 classes
 
-    if (isset($user) && isset($_GET['client_key'])) // this was 'code' for oauth, it signfies the first step after browser started process
-    // TODO - security make sur ethat isset($user) is sufficient because the GET provides 0 security
-    { 
-        $_SESSION['bitsharesdata'] = $user;
-        $_SESSION['bitshares']['idm'] = $user['id'];
-        $_SESSION['bitshares']['pic'] = !empty($user['picture']) ? $user['picture'] : '';
-        redirectexit('action=bitshares;auth=done');
+        if (isset($_GET['signed_secret'])) {
+            // ok first try and not authenticated.  try it.. throws exception if it doesnt work
+            $client->authenticate();
+            $_SESSION['token'] = $client->getAccessToken();
+        }
+        if (isset($_SESSION['token'])) {
+            $client->setAccessToken($_SESSION['token']);
+        }
+        if ($client->getAccessToken()) {
+            $user = $client->userinfo_get();
+            $_SESSION['token'] = $client->getAccessToken();
+        }
+
+        if (isset($user) && isset($_GET['client_key'])) // this was 'code' for oauth, it signfies the first step after browser started process
+        {
+            // OK user is authenticated.  setup the session variable and do the redirect
+            $_SESSION['bitsharesdata'] = $user;
+            $_SESSION['bitshares']['idm'] = $user['id'];
+            $_SESSION['bitshares']['pic'] = !empty($user['picture']) ? $user['picture'] : '';
+            redirectexit('action=bitshares;auth=done');
+        }
+    } catch (Exception $e){
+            return $e->getMessage();
     }
 }
 function bitshares_show_auth_login() {

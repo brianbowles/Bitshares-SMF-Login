@@ -51,19 +51,19 @@ class apiClient {
 
     // THere isnt a constructor written for these directly.. 
     private $RPC_SERVER_PATH = "rpc";
-    private $RPC_SERVER_ADDRESS;// = "localhost"; TODO remove these once debugging
-    private $RPC_SERVER_PORT;// = 57133;
-    private $RPC_SERVER_USER;// = "sitetest";
-    private $RPC_SERVER_PASS;// = "sitetestPW";
-    private $RPC_SERVER_WALLET;// = "test";
-    private $RPC_SERVER_WALLET_PASS;// = "genericE55IE";
-    private $BITSHARES_USER_NAME;// = "testingtoday"; // this is an account created on the servers wallet
-    private $SITE_DOMAIN;// = 'bitsharesnation.org'; 
+    private $RPC_SERVER_ADDRESS;
+    private $RPC_SERVER_PORT;
+    private $RPC_SERVER_USER;
+    private $RPC_SERVER_PASS;
+    private $RPC_SERVER_WALLET;
+    private $RPC_SERVER_WALLET_PASS;
+    private $BITSHARES_USER_NAME;
+    private $SITE_DOMAIN;
 
     private $authenticated = false;
     private $uid = - 1;
     private $userinfo = null;
-    private authenticateUnRegisteredBlockchain = true;
+    private $authenticateUnRegisteredBlockchain = true; // let em through the gate?
 
     public function __construct($config = array()) { // TODO is this a php constructor or garbage LOL
         global $apiConfig, $modSettings;
@@ -76,6 +76,7 @@ class apiClient {
 
         global $modSettings;
 
+        // wallet settings
         $this->RPC_SERVER_ADDRESS = $modSettings['bts_app_wallet_server'];
         $this->RPC_SERVER_PORT = $modSettings['bts_app_wallet_port'];
         $this->RPC_SERVER_USER = $modSettings['bts_app_wallet_user'];
@@ -84,6 +85,9 @@ class apiClient {
         $this->RPC_SERVER_WALLET_PASS = $modSettings['bts_app_wallet_walletpass'];
         $this->BITSHARES_USER_NAME = $modSettings['bts_app_wallet_site_account'];
         $this->SITE_DOMAIN = $modSettings['bts_app_wallet_site_domain'];
+
+        //
+        $this->authenticateUnRegisteredBlockchain = $modSettings['bts_app_register_unregistered'];
     }
 
     /*
@@ -96,7 +100,10 @@ class apiClient {
 
     /*
     SMF has some rule that enforces a valid email.  If auto is turned on, there is no email in the field so we need
-    a function to create a junk placeholder OR figure out how to  disable the email check TODO
+    a function to create a junk placeholder OR figure out how to  disable the email check ...
+
+    Since the auto mode is just a leftover from previous plugin and manual lets people actually put in emails which seems preferred
+    I am not going to fix this ...
     */
     private function createRandomValidEmail() {
         $vowels = 'aeuy';
@@ -115,46 +122,66 @@ class apiClient {
         return $password . "@gmail.com";
     }
 
-    // TODO this was the original array used by the gplus/oauth plugin.  We need to determine what
-    // determined these and if they can be removed/ modified, but for now we leave it alone to maintain backwards compat
+    /* this was the original array used by the gplus/oauth plugin.  We need to determine what
+     determined these and if they can be removed/ modified, but for now we leave it alone to maintain backwards compat
+    */
 
     private function init_userinfo() {
 
         return array(id => '', // make it into the pubic id
-	        email => $this->createRandomValidEmail(), //'changeme@gmail.com', // this has to be valid or it is caught in registration
-        	verified_email => true, 
+	    email => $this->createRandomValidEmail(), // this has to be valid or it is caught in registration
+       	verified_email => true,
 		name => '', 
 		given_name => '', 
 		family_name => '', 
 		link => '', // Appears to be google profile
-        	picture => '', 
+       	picture => '',
 		gender => '', 
 		locale => '');
     }
 
     // TODO grep for throw and look at exceptions, try to implement them in the same way
     // review 'token' php variable and make sure we are using it properly TODO
+    /*
+     * The functionality this is supposed to duplicate either returns a token string or does an exception
+     */
     public function authenticate() {
 
-        $this->authenticated = false; // TODO make sure this actually WORKS...  what is the point of the return ?
+        $this->authenticated = false;
         $bitshares = new Bitcoin($this->RPC_SERVER_USER, $this->RPC_SERVER_PASS, $this->RPC_SERVER_ADDRESS, $this->RPC_SERVER_PORT, $this->RPC_SERVER_PATH);// TODO act upon the return code in bitshares
+
         $bitshares->open($this->RPC_SERVER_WALLET);
+        if ($bitshares->status != 200) {
+            throw new Exception("Failed open wallet " . $bitshares->error);
+        }
+
         $bitshares->unlock(5, $this->RPC_SERVER_WALLET_PASS);
+        if ($bitshares->status != 200) {
+            throw new Exception("Failed unlock wallet " . $bitshares->error);
+        }
 
         //  _GET has client_key,client_name,server_key,signed_secret
-        if (isset($_GET["client_key"])) { // TODO what happens on the else ?
+        if (isset($_GET["client_key"])) {
 
             //  inspect loginPackage .. has user_account_key  and shared_secret
+
             $loginPackage = $bitshares->wallet_login_finish($_REQUEST["server_key"], $_REQUEST["client_key"], $_REQUEST["signed_secret"]);
+            if ($bitshares->status != 200) {
+                throw new Exception("wallet_login_finish failed");
+            }
+            if (! empty($bitshares->error) ) {
+                throw Exception($bitshares->error);
+            }
+
             $this->userinfo = $this->init_userinfo();
             $this->authenticated = (bool)$loginPackage; // TODO look at return code in php and trigger off working value and trigger off !=
 
             if ($this->authenticated == false) {
-                return;
+                throw new Exception("Authentication failed.");
             }
 
             if (isset($_REQUEST['signed_secret'])) {
-                $this->setAccessToken($_REQUEST['signed_secret']); // TODO is this a security issue?  maybe truncate the string
+                $this->setAccessToken($_REQUEST['signed_secret']); // So well set the token to be signed_secret.. dont have a better solution
             }
 
             $this->uid = $loginPackage["user_account_key"]; // Is this used anywhere? TODO
@@ -163,16 +190,15 @@ class apiClient {
             // if userAccount is null it may be because the account is not yet registered.
             $userAccount = $bitshares->blockchain_get_account($_GET['client_name']);
 
-            if (empty($userAccount) || (!$userAccount)) {
+            if (empty($userAccount)) {
                 // Account isnt registered, so use name passed
                 $this->userinfo['bitsharesregistered'] = false;
 
-		if ($authenticateUnRegisteredBlockchain) { 
-		   $this->userinfo['name'] = $_GET['client_name'];
-                   //$modSettings['bts_reg_auto'] = false; // perhaps we can change the registration from auto to manual right here ! TODO
-		} else {
-		   // TODO throw the exception 
-		}
+                if ($this->authenticateUnRegisteredBlockchain) {
+                   $this->userinfo['name'] = $_GET['client_name'];
+                } else {
+                    throw new Exception("The BitShares account does not appear to be registered on the blockchain. Please register the account");
+                }
             } else {
                 $this->userinfo['name'] = $userAccount['name'];
                 $this->userinfo['bitsharesregistered'] = true;
@@ -180,10 +206,13 @@ class apiClient {
 
             $this->userinfo['picture'] = 'http://robohash.org/' . $this->userinfo['name'];
             if (isset($userAccount["delegate_info"])) { // TODO add to test case
-                //echo "<p>This is the VIP section, for delegates only.</p>";
                 $this->userinfo->given_name = "Delegate";
             }
+            return $this->getAccessToken();
+        } else {
+            throw new Exception("URL is malformed. Stop hacking.");
         }
+
     }
 
     /* Original function from oAuth 
@@ -220,22 +249,32 @@ class apiClient {
     /*
     This is the code that calls the wallet to generate the authentication URL.
     That URL should be something like "bts://login ..." which will then load up the local wallet if the machine is configured properly
-    
+
+    It has a side effect of setting g_authurl_error which is a global. perhaps this should be the arguement to an exception
+
     */
     public function createAuthUrl() {
 
+        global $g_authurl_error; 
+
         $bitshares = new Bitcoin($this->RPC_SERVER_USER, $this->RPC_SERVER_PASS, $this->RPC_SERVER_ADDRESS, $this->RPC_SERVER_PORT, $this->RPC_SERVER_PATH);
         $bitshares->open($this->RPC_SERVER_WALLET);
-        if (!empty($bitshares->error)) {
-            return false; // TODO maybe report the bitshares error to the login screen
-            
-        }
-        $bitshares->unlock(2, $this->RPC_SERVER_WALLET_PASS);
-        //return $bitshares->wallet_login_start($BITSHARES_USER_NAME) . $SITE_DOMAIN . "/index.php?action=bitshares"; // probably works but bitshares code behaves weird
-        $loginStart = $bitshares->wallet_login_start($this->BITSHARES_USER_NAME);
-        if (empty($loginStart) || $loginStart == 'null') {
+        if ($bitshares->status != 200) {
+            $g_authurl_error = $bitshares->error;
             return false;
         }
+        $bitshares->unlock(2, $this->RPC_SERVER_WALLET_PASS); // with invalid password this doesnt trigger error
+        if ($bitshares->status != 200) {
+            $g_authurl_error = $bitshares->error;
+            return false;
+        }
+        //return $bitshares->wallet_login_start($BITSHARES_USER_NAME) . $SITE_DOMAIN . "/index.php?action=bitshares"; // probably works but bitshares code behaves weird
+        $loginStart = $bitshares->wallet_login_start($this->BITSHARES_USER_NAME);
+        if (($bitshares->status != 200) || empty($loginStart) || ($loginStart == 'null')) {
+            $g_authurl_error = $bitshares->error;
+            return false;
+        }
+        //loginredirect is needed to recreate URL variables that are stripped when the bts wallet calls the browser back
         return $loginStart . $this->SITE_DOMAIN . "/loginredirect.php";
     }
 }
