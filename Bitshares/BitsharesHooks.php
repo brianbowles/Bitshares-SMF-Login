@@ -79,7 +79,10 @@ function ob_bitshares(&$buffer) {
 
         bitshares_init_auth_url(); // authUrl is side effect /return of this
 	// we also create g_authurl_error
-        if ((empty($authUrl) || (!$authUrl))) { 
+
+        $txt['guestnew'] = sprintf($txt['welcome_guest'], $txt['guest_title']);
+	
+        if (empty($authUrl)) {
 	        // change out the button with a span of the error
             if ((!empty($modSettings['bts_app_printerrorsatfailure'])) && $modSettings['bts_app_printerrorsatfailure']) {
                 $buffer = preg_replace('~(' . preg_quote('<div class="info">' . $txt['guestnew'] . '</div>') . ')~', '<div>' . $g_authurl_error . '</div><div class="info">' . $txt['guestnew'] . '</div>', $buffer);
@@ -87,8 +90,6 @@ function ob_bitshares(&$buffer) {
             return $buffer; //lets not put a button up
         }
 
-        $txt['guestnew'] = sprintf($txt['welcome_guest'], $txt['guest_title']);
-	
 	// one does frontpage, one is for the forgot password page.... third?
         $buffer = preg_replace('~(' . preg_quote('<div class="info">' . $txt['guestnew'] . '</div>') . ')~', '<a href="' . $authUrl . '"><img src="' . $modSettings['bts_app_custon_logimg'] . '" alt="" /></a><div class="info">' . $txt['guestnew'] . '</div>', $buffer);
         $buffer = preg_replace('~(' . preg_quote($txt['forgot_your_password'] . '</a></p>') . ')~', $txt['forgot_your_password'] . '</a></p><div align="center"><a href="' . $authUrl . '"><img src="' . $modSettings['bts_app_custon_logimg'] . '" alt="" /></a></div>', $buffer);
