@@ -44,6 +44,7 @@ function Bitshares() {
 /*
 TODO is this called
 */
+/*
 function bitshares_Profile() {
 
     global $twpic, $scripturl, $modSettings, $context;
@@ -56,7 +57,7 @@ function bitshares_Profile() {
         updateMemberData($_GET['u'], array('avatar' => $_SESSION['bitshares']['pic']));
         redirectexit('action=profile;area=gsettings;u=' . $_GET['u'] . ';avatardone');
     }
-}
+}*/
 function bitshares_logsync() {
 
     global $context;
@@ -142,6 +143,7 @@ function bitshares_connectlog() {
     redirectexit($bitshares_log_url);
 }
 function bitshares_createRandomPassword($length = 8, $strength = 8) {
+    // TODO should this not default to strength 15
     $vowels = 'aeuy';
     $consonants = 'bdghjmnpqrstvz';
     if ($strength & 1) {
@@ -218,15 +220,17 @@ function bitshares_connectAuto() {
         redirectexit('action=bitshares;area=logsync;nt;u=' . $member_load['real_name'] . '');
     }
 
-    $pass = bitshares_createRandomPassword();
-    $regOptions = array('interface' => 'guest', 'auth_method' => 'password', 'username' => $_SESSION['bitshares']['name'], 'email' => $_SESSION['bitshares']['email'], 'require' => 'nothing', 'password' => $pass, 'password_check' => $pass, 'password_salt' => substr(md5(mt_rand()), 0, 4), 'send_welcome_email' => !empty($modSettings['send_welcomeEmail']), 'check_password_strength' => false, 'check_email_ban' => false, 'extra_register_vars' => array('id_group' => !empty($modSettings['bts_app_detait_gid']) ? $modSettings['bts_app_detait_gid'] : '0',),);
+    $pass = bitshares_createRandomPassword(12,15);
+    $email = bitshares_createRandomPassword(10,3).'@thiscanneverbeavaliddomainifyouwanttochangeyouremailtosomethingvalidpleasechangeit.com';
+
+    $regOptions = array('interface' => 'guest', 'auth_method' => 'password', 'username' => $_SESSION['bitshares']['name'], 'email' => $email, 'require' => 'nothing', 'password' => $pass, 'password_check' => $pass, 'password_salt' => substr(md5(mt_rand()), 0, 4), 'send_welcome_email' => !empty($modSettings['send_welcomeEmail']), 'check_password_strength' => false, 'check_email_ban' => false, 'extra_register_vars' => array('id_group' => !empty($modSettings['bts_app_detait_gid']) ? $modSettings['bts_app_detait_gid'] : '0',),);
 
     // ok if not registered on blockchain but it is bitshares login, try alt membergroup
     if (isset($_SESSION['bitsharesdata']['bitsharesregistered']) && (!$_SESSION['bitsharesdata']['bitsharesregistered'])) {
         $regOptions['extra_register_vars'] = array('id_group' => !empty($modSettings['bts_app_detait_gid2']) ? $modSettings['bts_app_detait_gid2'] : '0',);
     }
     require_once ($sourcedir . '/Subs-Members.php');
-    $memberID = registerMember($regOptions);
+    $memberID = registerMember($regOptions); // TODO make sure these are both escaped properly
     updateMemberData($memberID, array('btsid' => $_SESSION['bitshares']['id'], 'btsname' => $_SESSION['bitshares']['name'],));
 
     synchRoboHash($memberID);
@@ -235,7 +239,13 @@ function bitshares_connectAuto() {
 
 /* If registration is set to manual and not auto then we call this ,
  * sets off registration agreement then after checking off goes here
- This is called before registration agreemeent, after registration agreement, after manual account info entry  */
+ This is called before registration agreemeent,-- this cmment is likely wrong, it is called within this function
+This code is required to process the function found in the template file.. originally had 2 fields for password, but we
+decided to remove that as the user experience/flow is lacking.  So we create a regular account with an unknown password.
+So now the template has the username grayed out and actually not submitted .. and passwords removed, but email is still there
+However if the user wishes to put in a blank email then we create a fake one that will never be valid
+
+  */
 function bitshares_connect() {
     
     global $modSettings, $sourcedir, $context;
@@ -254,15 +264,24 @@ function bitshares_connect() {
         if ($member_load['real_name']) { // nt throws up screen telling user the user already exists
             redirectexit('action=bitshares;area=logsync;nt;u=' . $member_load['real_name'] . '');
         }
-        $pass = bitshares_createRandomPassword();
+        $pass = bitshares_createRandomPassword();// TODO
         $user = $_SESSION['bitshares']['name'];
+        $email = $_POST['email'];
 
-        $regOptions = array('interface' => 'guest', 'auth_method' => 'password', 'username' => $user, 'email' => $_POST['email'], 'require' => 'nothing', 'password' => $pass, 'password_check' => $pass, 'password_salt' => substr(md5(mt_rand()), 0, 4), 'send_welcome_email' => !empty($modSettings['send_welcomeEmail']), 'check_password_strength' => false, 'check_email_ban' => false, 'extra_register_vars' => array('id_group' => !empty($modSettings['bts_app_detait_gid']) ? $modSettings['bts_app_detait_gid'] : '0',),);
+        if (empty($_POST['email'])) {
+            // So the SMF code has a hardcoded regex that checks every email and also checks empty(email)
+            // There is no way to disable this without rewriting our own implementation of registerMember
+            // So our solution is to allow a user to submit a blank email an we stuff in an email that can never be legal
+            $email = bitshares_createRandomPassword(10,3).'@thiscanneverbeavaliddomainifyouwanttochangeyouremailtosomethingvalidpleasechangeit.com';
+        }
+        // TODO these are supposed to be escaped for call to registerMember and updateMemberData
+        $regOptions = array('interface' => 'guest', 'auth_method' => 'password', 'username' => $user, 'email' => $email, 'require' => 'nothing', 'password' => $pass, 'password_check' => $pass, 'password_salt' => substr(md5(mt_rand()), 0, 4), 'send_welcome_email' => !empty($modSettings['send_welcomeEmail']), 'check_password_strength' => false, 'check_email_ban' => false, 'extra_register_vars' => array('id_group' => !empty($modSettings['bts_app_detait_gid']) ? $modSettings['bts_app_detait_gid'] : '0',),);
         // ok if not registered on blockchain but it is bitshares login, try alt membergroup
         if (isset($_SESSION['bitsharesdata']['bitsharesregistered']) && (!$_SESSION['bitsharesdata']['bitsharesregistered'])) {
             $regOptions['extra_register_vars'] = array('id_group' => !empty($modSettings['bts_app_detait_gid2']) ? $modSettings['bts_app_detait_gid2'] : '0',);
         }
         require_once ($sourcedir . '/Subs-Members.php');
+
         $memberID = registerMember($regOptions);
         updateMemberData($memberID, array('btsid' => $_SESSION['bitshares']['id'], 'btsname' => $_SESSION['bitshares']['name'],));
 

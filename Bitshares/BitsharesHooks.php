@@ -78,18 +78,20 @@ function ob_bitshares(&$buffer) {
     if (!$context['user']['is_logged']) { // ok if user is not logged in, then lets create the login buttons at top
 
         bitshares_init_auth_url(); // authUrl is side effect /return of this
-	// we also create g_authurl_error
 
         $txt['guestnew'] = sprintf($txt['welcome_guest'], $txt['guest_title']);
-	
-        if (empty($authUrl)) {
+
+	// we also create g_authurl_error
+        if ((empty($authUrl) || (!$authUrl))) { 
 	        // change out the button with a span of the error
             if ((!empty($modSettings['bts_app_printerrorsatfailure'])) && $modSettings['bts_app_printerrorsatfailure']) {
-                $buffer = preg_replace('~(' . preg_quote('<div class="info">' . $txt['guestnew'] . '</div>') . ')~', '<div>' . $g_authurl_error . '</div><div class="info">' . $txt['guestnew'] . '</div>', $buffer);
+                $buffer = preg_replace('~(' . preg_quote('<div class="info">' . $txt['guestnew'] . '</div>') . ')~', '<p>' . $g_authurl_error . '</p><div class="info">' . $txt['guestnew'] . '</div>', $buffer);
             }
             return $buffer; //lets not put a button up
         }
 
+
+	
 	// one does frontpage, one is for the forgot password page.... third?
         $buffer = preg_replace('~(' . preg_quote('<div class="info">' . $txt['guestnew'] . '</div>') . ')~', '<a href="' . $authUrl . '"><img src="' . $modSettings['bts_app_custon_logimg'] . '" alt="" /></a><div class="info">' . $txt['guestnew'] . '</div>', $buffer);
         $buffer = preg_replace('~(' . preg_quote($txt['forgot_your_password'] . '</a></p>') . ')~', $txt['forgot_your_password'] . '</a></p><div align="center"><a href="' . $authUrl . '"><img src="' . $modSettings['bts_app_custon_logimg'] . '" alt="" /></a></div>', $buffer);
@@ -132,7 +134,7 @@ Purpose: allows add or modify the menu in the profile area
 */
 function bitshares_profile_areas(&$profile_areas) {
 
-    global $user_settings, $txt, $authUrl, $scripturl, $modSettings, $sc;
+    global $user_settings, $txt, $authUrl, $modSettings, $sc;
 
     if (empty($user_settings['btsid']) && !empty($modSettings['bts_app_enabled'])) {
         bitshares_init_auth_url();
@@ -237,11 +239,13 @@ function bitshares_init_auth() {
             return $e->getMessage();
     }
 }
+/* generates the html for the login auth button */
 function bitshares_show_auth_login() {
     global $authUrl, $modSettings;
     bitshares_init_auth_url();
     echo '<a href="' . $authUrl . '"><img src="' . $modSettings['bts_app_custon_logimg'] . '" alt="" /></a>';
 }
+/* this takes member_id and loads from the main members table .. goes from bitshares -> smf  */
 function bitshares_loadUser($member_id, $where_id) {
     global $smcFunc;
     $results = $smcFunc['db_query']('', '
