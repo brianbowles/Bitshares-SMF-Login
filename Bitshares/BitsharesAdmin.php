@@ -47,7 +47,6 @@ function bitshares_admin() {
     array('check', 'bts_app_enabled'),
     array('check', 'bts_app_printerrorsatfailure'),
     array('check','bts_app_register_unregistered'),
-    //    array('check', 'bts_app_enabledautolog') // this undoubtedly has old code sitting around ? TODO
     '',
     //		array('text', 'bts_app_client_id'),
     //		array('text', 'bts_app_client_secret'),

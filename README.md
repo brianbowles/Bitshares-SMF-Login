@@ -41,16 +41,12 @@ loginredirect.php has a hardcoded domain because it doesnt load up the full SMF 
 
 
 TODO -
-Look at token cookie and exceptions
-Create a bug report after verifying behavior of the behavior requireing loginredirect.php
 
-grep through looking for changes
-gplus/gp/google/error_log/gsetting at the end
+Create a bug report after verifying behavior of the behavior requireing loginredirect.php
+The logs screen has a weird bts:call is that correct ?
+Havent tested it on a site with SSL
 
 TESTING LIST
-Make sure SSL works
-Make sure that you can not change the name when set to mamual login	
-check out behavior of token.. and logout etc.. does it operator as a boolean?
-check out the syncing of accounts when an account already exists
+
 
 Ok create a fresh account. Fail the email login then try it again.  It created an account but gave me a strange error.

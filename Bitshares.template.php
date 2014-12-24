@@ -24,7 +24,8 @@
  * ***** END LICENSE BLOCK ***** */
 function template_main() {
 }
-
+/* I suspect this is dead code */
+/*
 function template_gppro() {
     global $context, $scripturl, $authUrl, $modSettings, $sc, $txt;
      bitshares_init_auth_url();   
@@ -54,12 +55,12 @@ function template_gppro() {
 				<span class="botslice"><span></span></span> 
 			</div> ';
 }
-
+*/
 function template_bitshares_logsync() {
 global $txt, $scripturl, $context;
 
     echo' 
-	<form action="', $scripturl, '?action=login2;syncgp" name="frmLogin" id="frmLogin" method="post" accept-charset="', $context['character_set'], '" ', empty($context['disable_login_hashing']) ? ' onsubmit="hashLoginPassword(this, \'' . $context['session_id'] . '\');"' : '', '>';
+	<form action="', $scripturl, '?action=login2;syncbts" name="frmLogin" id="frmLogin" method="post" accept-charset="', $context['character_set'], '" ', empty($context['disable_login_hashing']) ? ' onsubmit="hashLoginPassword(this, \'' . $context['session_id'] . '\');"' : '', '>';
 	    echo' 
 		<span class="upperframe"><span></span></span>
 	        <div class="roundframe centertext">';

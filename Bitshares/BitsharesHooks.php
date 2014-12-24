@@ -131,7 +131,10 @@ function bitshares_admin_areas(&$admin_areas) {
 /*
 Called from: Profile.php, just after the definition of the default profile areas (i.e. the menu entries for the profile section)
 Purpose: allows add or modify the menu in the profile area
+
+This code was removed.  THere is no point for bitshares profiles except possibly disassociate accounts.
 */
+/*
 function bitshares_profile_areas(&$profile_areas) {
 
     global $user_settings, $txt, $authUrl, $modSettings, $sc;
@@ -144,7 +147,7 @@ function bitshares_profile_areas(&$profile_areas) {
         bitshares_array_insert($profile_areas, 'profile_action', array('profile_bts' => array('title' => $txt['bts_bitshares'], 'areas' => array('gsettings' => array('label' => 'Settings', 'file' => 'Bitshares/Bitshares.php', 'function' => 'bitshares_Profile', 'sc' => $sc, 'permission' => array('own' => 'profile_view_own', 'any' => '',),),),),));
     }
 }
-
+*/
 
 /*
 Called from: Load.php, at the end of loadTheme(), to load any information that potentially affects top level loading of the theme itself.
