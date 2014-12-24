@@ -65,10 +65,6 @@ class apiClient {
     private $userinfo = null;
     private $authenticateUnRegisteredBlockchain = true; // let em through the gate?
 
-    public function __construct($config = array()) { // TODO is this a php constructor or garbage LOL
-        global $apiConfig, $modSettings;
-    }
-
     /*
     This should likely be a constructor, but 8 parameters is excessive and just as likely to add problems. meh
     */
@@ -140,15 +136,13 @@ class apiClient {
 		locale => '');
     }
 
-    // TODO grep for throw and look at exceptions, try to implement them in the same way
-    // review 'token' php variable and make sure we are using it properly TODO
     /*
      * The functionality this is supposed to duplicate either returns a token string or does an exception
      */
     public function authenticate() {
 
         $this->authenticated = false;
-        $bitshares = new Bitcoin($this->RPC_SERVER_USER, $this->RPC_SERVER_PASS, $this->RPC_SERVER_ADDRESS, $this->RPC_SERVER_PORT, $this->RPC_SERVER_PATH);// TODO act upon the return code in bitshares
+        $bitshares = new Bitcoin($this->RPC_SERVER_USER, $this->RPC_SERVER_PASS, $this->RPC_SERVER_ADDRESS, $this->RPC_SERVER_PORT, $this->RPC_SERVER_PATH);
 
         $bitshares->open($this->RPC_SERVER_WALLET);
         if ($bitshares->status != 200) {
@@ -174,9 +168,9 @@ class apiClient {
             }
 
             $this->userinfo = $this->init_userinfo();
-            $this->authenticated = (bool)$loginPackage; // TODO look at return code in php and trigger off working value and trigger off !=
+            $this->authenticated = (bool)$loginPackage;  
 
-            if ($this->authenticated == false) {
+            if ($this->authenticated == false) {// overly redundant oh well
                 throw new Exception("Authentication failed.");
             }
 
@@ -184,8 +178,7 @@ class apiClient {
                 $this->setAccessToken($_REQUEST['signed_secret']); // So well set the token to be signed_secret.. dont have a better solution
             }
 
-            $this->uid = $loginPackage["user_account_key"]; // Is this used anywhere? TODO
-            $this->userinfo['id'] = $this->uid; // later this turns into the btsid or gid or somesuch
+            $this->userinfo['id'] = $loginPackage["user_account_key"];
 
             // if userAccount is null it may be because the account is not yet registered.
             $userAccount = $bitshares->blockchain_get_account($_GET['client_name']);
@@ -205,9 +198,11 @@ class apiClient {
             }
 
             $this->userinfo['picture'] = 'http://robohash.org/' . $this->userinfo['name'];
-            if (isset($userAccount["delegate_info"])) { // TODO add to test case
+	    /*
+            if (isset($userAccount["delegate_info"])) { // untested
                 $this->userinfo->given_name = "Delegate";
-            }
+            } 
+            */
             return $this->getAccessToken();
         } else {
             throw new Exception("URL is malformed. Stop hacking.");

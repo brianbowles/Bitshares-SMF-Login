@@ -20,7 +20,7 @@
     // So we strip out the domain + logindirect
 	// TODO fix this...  figure this out and submit bug report
     // until then weve left hostname hardcoded to not load up the full smf context to read variables..
-    $absolute_url =  str_replace("192.168.0.66/loginredirect.php?","index.php?action=bitshares&",$absolute_url);
+    $absolute_url =  str_replace("bitsharesnation.org/loginredirect.php?","index.php?action=bitshares&",$absolute_url);
 
  ?>
 

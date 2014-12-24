@@ -34,6 +34,7 @@ Create a login button or copy the one out of the Package to a desired hosting lo
 
 Optional - A lot of SMF installations allow users to change their username.  If you allow this a person can impersonate others by registering under a blockchain registered name then changing their name. If you want trust in the username's created into the Bitshares membergroups then this functionality will need ot be disabled.  Find this in Allow users to edit their displayed name under Admin/Configuration/General
 
+Edit loginredirect and make sure the domain listed at the bottom is correct.  (it won't be until you do it)  If you see an error - wallet_login_finish failed then look here.  
 ----- Issues 
 The admin configuration seems to have refresh issues due to caching.  The values are saved internally but will not show up then the Save button is clicked until the cache expires. It is purely a display issue so very low priority.
 

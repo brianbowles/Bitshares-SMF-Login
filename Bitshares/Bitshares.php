@@ -81,7 +81,7 @@ function bitshares_main() {
             if (empty($user_settings['btsid'])) {
                 redirectexit('action=bitshares;area=sync;sesc=' . $sc . '');
             } else {
-                redirectexit('action=profile;u=' . $user_info['id'] . ');
+                redirectexit('action=profile;u=' . $user_info['id'] . '');
             }
         } else {
             $member_load = bitshares_loadUser($_SESSION['bitshares']['id'], 'btsid');
@@ -100,7 +100,7 @@ function bitshares_main() {
             }
         }
     } else {
-	if empty($modSettings['bts_app_printerrorsatfailure']) {
+	if (empty($modSettings['bts_app_printerrorsatfailure'])) {
             fatal_lang_error('bts__app_error2', false); // This is Did you try to skip authorization?	
 	} else {
             setup_fatal_error_context($err); // we might leak wallet info here.. 
