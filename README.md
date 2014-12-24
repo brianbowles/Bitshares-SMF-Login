@@ -45,7 +45,7 @@ Look at token cookie and exceptions
 Create a bug report after verifying behavior of the behavior requireing loginredirect.php
 
 grep through looking for changes
-gplus/gp/google/error_log at the end
+gplus/gp/google/error_log/gsetting at the end
 
 TESTING LIST
 Make sure SSL works

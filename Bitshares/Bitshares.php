@@ -41,23 +41,7 @@ function Bitshares() {
     $context['sub_action'] = $_REQUEST['area'];
     $subActions[$_REQUEST['area']]();
 }
-/*
-TODO is this called
-*/
-/*
-function bitshares_Profile() {
 
-    global $twpic, $scripturl, $modSettings, $context;
-
-    loadTemplate('Bitshares');
-    $context['sub_template'] = 'btspro';
-    if (isset($_GET['btsdoavatar'])) { // I am not sure how this works, it appears to be separated out from user picture..  I think we may just remove this code
-        if (empty($_SESSION['bitshares']['pic'])) fatal_error('you have no avatar associated with this account', false);
-        $_SESSION['bitshares']['pic'] = str_replace('https', 'http', $_SESSION['bitshares']['pic']);
-        updateMemberData($_GET['u'], array('avatar' => $_SESSION['bitshares']['pic']));
-        redirectexit('action=profile;area=gsettings;u=' . $_GET['u'] . ';avatardone');
-    }
-}*/
 function bitshares_logsync() {
 
     global $context;
@@ -97,7 +81,7 @@ function bitshares_main() {
             if (empty($user_settings['btsid'])) {
                 redirectexit('action=bitshares;area=sync;sesc=' . $sc . '');
             } else {
-                redirectexit('action=profile;area=gsettings;u=' . $user_info['id'] . ';btsdoavatar');
+                redirectexit('action=profile;u=' . $user_info['id'] . ');
             }
         } else {
             $member_load = bitshares_loadUser($_SESSION['bitshares']['id'], 'btsid');
@@ -107,7 +91,7 @@ function bitshares_main() {
                 
             } else {
                 if (!empty($modSettings['requireAgreement'])) { // after initial auth and no account being loaded, send them to the registration agreement
-                    $mode = empty($modSettings['bts_reg_auto']) ? 'connect' : 'auto'; // modSettings is the plugins settings. registration method auto/manual - auto is broken TODO
+                    $mode = empty($modSettings['bts_reg_auto']) ? 'connect' : 'auto';
                     redirectexit('action=bitshares;area=' . $mode . ';agree');
                 } else {
                     $mode = empty($modSettings['bts_reg_auto']) ? 'connect' : 'auto';
@@ -116,8 +100,11 @@ function bitshares_main() {
             }
         }
     } else {
-        setup_fatal_error_context($err); // we might leak wallet info here.. TODO wrap the boolean around this
-        //fatal_lang_error('bts__app_error2', false); // This is Did you try to skip authorization?
+	if empty($modSettings['bts_app_printerrorsatfailure']) {
+            fatal_lang_error('bts__app_error2', false); // This is Did you try to skip authorization?	
+	} else {
+            setup_fatal_error_context($err); // we might leak wallet info here.. 
+	}
         
     }
 }
@@ -142,8 +129,8 @@ function bitshares_connectlog() {
     $bitshares_log_url = !empty($modSettings['bts_app_custon_logurl']) ? $modSettings['bts_app_custon_logurl'] : $scripturl;
     redirectexit($bitshares_log_url);
 }
-function bitshares_createRandomPassword($length = 8, $strength = 8) {
-    // TODO should this not default to strength 15
+function bitshares_createRandomPassword($length = 8, $strength = 15) {
+
     $vowels = 'aeuy';
     $consonants = 'bdghjmnpqrstvz';
     if ($strength & 1) {
@@ -264,7 +251,7 @@ function bitshares_connect() {
         if ($member_load['real_name']) { // nt throws up screen telling user the user already exists
             redirectexit('action=bitshares;area=logsync;nt;u=' . $member_load['real_name'] . '');
         }
-        $pass = bitshares_createRandomPassword();// TODO
+        $pass = bitshares_createRandomPassword(12,15);
         $user = $_SESSION['bitshares']['name'];
         $email = $_POST['email'];
 
