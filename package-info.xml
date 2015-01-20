@@ -11,7 +11,7 @@
 	<name>BitShares Login</name>
 	<id>gamey:BitShares Login</id>
 	<type>modification</type>
-	<version>0.1 REV 1</version>  
+	<version>0.1.2</version>  
 	
 	<install for="2.0 - 2.0.99">
 	<code>install.php</code>
@@ -20,7 +20,6 @@
 	<require-file name="Bitshares.template.php" destination="$themedir" />
 	<require-file name="lang/Bitshares.english.php" destination="$languagedir" />
 	<require-file name="lang/Bitshares.english-utf8.php" destination="$languagedir" />
-	<require-file name="loginredirect.php" destination="$boarddir" />
     </install>
 	
 	<uninstall for="2.0 - 2.0.99">
@@ -29,7 +28,6 @@
 	<remove-file name="$themedir/Bitshares.template.php" />
 	<remove-file name="$languagedir/Bitshares.english.php" />
 	<remove-file name="$languagedir/Bitshares.english-utf8.php" />
-	<remove-file name="$boarddir/loginredirect.php" />
 	<code>UnInstall.php</code>
 	</uninstall>
 </package-info>

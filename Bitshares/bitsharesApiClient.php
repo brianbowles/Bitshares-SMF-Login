@@ -250,8 +250,7 @@ class apiClient {
     This is the code that calls the wallet to generate the authentication URL.
     That URL should be something like "bts://login ..." which will then load up the local wallet if the machine is configured properly
 
-    It has a side effect of setting g_authurl_error which is a global. perhaps this should be the arguement to an exception
-
+    It has a side effect of setting g_authurl_error which is a global. perhaps this should be the arguement to an exception.  This is not consistent in that regard but is how mimicking gauth seemed to best be accomplished at the time
     */
     public function createAuthUrl() {
 
@@ -268,13 +267,12 @@ class apiClient {
             $g_authurl_error = $bitshares->error;
             return false;
         }
-        //return $bitshares->wallet_login_start($BITSHARES_USER_NAME) . $SITE_DOMAIN . "/index.php?action=bitshares"; // probably works but bitshares code behaves weird
+
         $loginStart = $bitshares->wallet_login_start($this->BITSHARES_USER_NAME);
         if (($bitshares->status != 200) || empty($loginStart) || ($loginStart == 'null')) {
             $g_authurl_error = $bitshares->error;
             return false;
         }
-        //loginredirect is needed to recreate URL variables that are stripped when the bts wallet calls the browser back
-        return $loginStart . $this->SITE_DOMAIN . "/loginredirect.php";
+	return $loginStart . $this->SITE_DOMAIN . "/index.php?action=bitshares"; 
     }
 }
