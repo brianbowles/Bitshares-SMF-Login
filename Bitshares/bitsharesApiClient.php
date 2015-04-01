@@ -49,7 +49,8 @@ require_once "easybitcoin.php";
 
 class apiClient {
 
-    // THere isnt a constructor written for these directly.. 
+    // THere isnt a constructor written for these directly..
+    // theyre all caps because they were constants
     private $RPC_SERVER_PATH = "rpc";
     private $RPC_SERVER_ADDRESS;
     private $RPC_SERVER_PORT;
@@ -61,13 +62,8 @@ class apiClient {
     private $SITE_DOMAIN;
 
     private $authenticated = false;
-    private $uid = - 1;
     private $userinfo = null;
-    private $authenticateUnRegisteredBlockchain = true; // let em through the gate?
-
-    public function __construct($config = array()) { // TODO is this a php constructor or garbage LOL
-        global $apiConfig, $modSettings;
-    }
+    private $authenticateUnRegisteredBlockchain = true; // let em through the gate .. read out of SMFs modsettings
 
     /*
     This should likely be a constructor, but 8 parameters is excessive and just as likely to add problems. meh
@@ -86,8 +82,7 @@ class apiClient {
         $this->BITSHARES_USER_NAME = $modSettings['bts_app_wallet_site_account'];
         $this->SITE_DOMAIN = $modSettings['bts_app_wallet_site_domain'];
 
-        //
-        $this->authenticateUnRegisteredBlockchain = $modSettings['bts_app_register_unregistered'];
+        $this->setAuthenticateUnRegisteredBlockchain($modSettings['bts_app_register_unregistered']);
     }
 
     /*
@@ -95,7 +90,7 @@ class apiClient {
     this to the plugin
     */
     public function setAuthenticateUnRegisteredBlockchain($v) {
-    	   $authenticateUnRegisteredBlockchain = $v;
+    	   $this->authenticateUnRegisteredBlockchain = $v;
     }
 
     /*
@@ -119,7 +114,8 @@ class apiClient {
                 $alt = 1;
             }
         }
-        return $password . "@gmail.com";
+        // the idea here is that whatever happens, no one can figure out this random email address then claim it and and assocaite SMF acct.
+        return $password . "@thiscanneverbeavaliddomainifyouwanttochangeyouremailtosomethingvalidpleasechangeitok.com";
     }
 
     /* this was the original array used by the gplus/oauth plugin.  We need to determine what
@@ -140,15 +136,15 @@ class apiClient {
 		locale => '');
     }
 
-    // TODO grep for throw and look at exceptions, try to implement them in the same way
-    // review 'token' php variable and make sure we are using it properly TODO
+    // review 'token' php variable and make sure we are using it properly TODO - looked at code ok but double check SMF site
     /*
      * The functionality this is supposed to duplicate either returns a token string or does an exception
      */
     public function authenticate() {
 
         $this->authenticated = false;
-        $bitshares = new Bitcoin($this->RPC_SERVER_USER, $this->RPC_SERVER_PASS, $this->RPC_SERVER_ADDRESS, $this->RPC_SERVER_PORT, $this->RPC_SERVER_PATH);// TODO act upon the return code in bitshares
+        // TODO act upon the return code in bitshares
+        $bitshares = new Bitcoin($this->RPC_SERVER_USER, $this->RPC_SERVER_PASS, $this->RPC_SERVER_ADDRESS, $this->RPC_SERVER_PORT, $this->RPC_SERVER_PATH);
 
         $bitshares->open($this->RPC_SERVER_WALLET);
         if ($bitshares->status != 200) {
@@ -173,8 +169,8 @@ class apiClient {
                 throw Exception($bitshares->error);
             }
 
-            $this->userinfo = $this->init_userinfo();
-            $this->authenticated = (bool)$loginPackage; // TODO look at return code in php and trigger off working value and trigger off !=
+            $this->userinfo = $this->init_userinfo(); // set everything to a reasonable or needed default ...
+            $this->authenticated = (bool)$loginPackage; // TODO add code here
 
             if ($this->authenticated == false) {
                 throw new Exception("Authentication failed.");
@@ -184,10 +180,7 @@ class apiClient {
                 $this->setAccessToken($_REQUEST['signed_secret']); // So well set the token to be signed_secret.. dont have a better solution
             }
 
-            $this->uid = $loginPackage["user_account_key"]; // Is this used anywhere? TODO
-            $this->userinfo['id'] = $this->uid; // later this turns into the btsid or gid or somesuch
-
-            // if userAccount is null it may be because the account is not yet registered.
+            $this->userinfo['id'] = $loginPackage["user_account_key"];
             $userAccount = $bitshares->blockchain_get_account($_GET['client_name']);
 
             if (empty($userAccount)) {
@@ -199,13 +192,14 @@ class apiClient {
                 } else {
                     throw new Exception("The BitShares account does not appear to be registered on the blockchain. Please register the account");
                 }
+
             } else {
                 $this->userinfo['name'] = $userAccount['name'];
                 $this->userinfo['bitsharesregistered'] = true;
             }
 
             $this->userinfo['picture'] = 'http://robohash.org/' . $this->userinfo['name'];
-            if (isset($userAccount["delegate_info"])) { // TODO add to test case
+            if (isset($userAccount["delegate_info"])) { // add to test case .. code not tested
                 $this->userinfo->given_name = "Delegate";
             }
             return $this->getAccessToken();
@@ -224,7 +218,7 @@ class apiClient {
      However we are not receiving JSON so this is our simplified version
     */
     public function setAccessToken($accessToken) {
-        if ($accessToken == null || 'null' == $accessToken) {
+        if (('null' == $accessToken) || (!$accessToken) || isempty($accessToken)) {
             $accessToken = null;
             throw new apiAuthException('Access Token not valid');
         }
@@ -233,7 +227,7 @@ class apiClient {
 
     public function getAccessToken() {
         $token = $this->accessToken;
-        return (null == $token || 'null' == $token) ? null : $token;
+        return (null == $token || 'null' == $token ) ? null : $token; // lot of redundancy but that is ok
     }
 
     /*
@@ -273,6 +267,7 @@ class apiClient {
             $g_authurl_error = $bitshares->error;
             return false;
         }
-	return $loginStart . $this->SITE_DOMAIN . "/index.php?action=bitshares"; 
+	    return $loginStart . $this->SITE_DOMAIN . "/index.php?action=bitshares";
     }
 }
+

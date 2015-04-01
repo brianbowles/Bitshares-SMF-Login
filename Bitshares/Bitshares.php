@@ -81,15 +81,17 @@ function bitshares_main() {
             if (empty($user_settings['btsid'])) {
                 redirectexit('action=bitshares;area=sync;sesc=' . $sc . '');
             } else {
-                redirectexit('action=profile;u=' . $user_info['id'] . ');
+                redirectexit('action=profile;u=' . $user_info['id'] . '');
             }
         } else {
             $member_load = bitshares_loadUser($_SESSION['bitshares']['id'], 'btsid');
             if (empty($_SESSION['login_url']) && isset($_SESSION['old_url']) && strpos($_SESSION['old_url'], 'dlattach') === false && preg_match('~(board|topic)[=,]~', $_SESSION['old_url']) != 0) $_SESSION['login_url'] = $_SESSION['old_url'];
             if ($member_load['btsid']) {
+
                 redirectexit('action=bitshares;area=connectlog'); // This is the working path on the LAST redirect.. but btsid == '' WTF
-                
+
             } else {
+
                 if (!empty($modSettings['requireAgreement'])) { // after initial auth and no account being loaded, send them to the registration agreement
                     $mode = empty($modSettings['bts_reg_auto']) ? 'connect' : 'auto';
                     redirectexit('action=bitshares;area=' . $mode . ';agree');
@@ -97,10 +99,11 @@ function bitshares_main() {
                     $mode = empty($modSettings['bts_reg_auto']) ? 'connect' : 'auto';
                     redirectexit('action=bitshares;area=' . $mode . '');
                 }
+
             }
         }
     } else {
-	if empty($modSettings['bts_app_printerrorsatfailure']) {
+	if (empty($modSettings['bts_app_printerrorsatfailure'])) {
             fatal_lang_error('bts__app_error2', false); // This is Did you try to skip authorization?	
 	} else {
             setup_fatal_error_context($err); // we might leak wallet info here.. 
@@ -126,8 +129,8 @@ function bitshares_connectlog() {
     unset($_SESSION['bitshares']['id']);
     unset($_SESSION['bitshares']['name']);
     unset($_SESSION['bitsharesdata']);
-    $bitshares_log_url = !empty($modSettings['bts_app_custon_logurl']) ? $modSettings['bts_app_custon_logurl'] : $scripturl;
-    redirectexit($bitshares_log_url);
+
+    redirectexit($scripturl);
 }
 function bitshares_createRandomPassword($length = 8, $strength = 15) {
 
@@ -209,16 +212,18 @@ function bitshares_connectAuto() {
 
     $pass = bitshares_createRandomPassword(12,15);
     $email = bitshares_createRandomPassword(10,3).'@thiscanneverbeavaliddomainifyouwanttochangeyouremailtosomethingvalidpleasechangeit.com';
+    $user = un_htmlspecialchars($_SESSION['bitshares']['name']);
 
-    $regOptions = array('interface' => 'guest', 'auth_method' => 'password', 'username' => $_SESSION['bitshares']['name'], 'email' => $email, 'require' => 'nothing', 'password' => $pass, 'password_check' => $pass, 'password_salt' => substr(md5(mt_rand()), 0, 4), 'send_welcome_email' => !empty($modSettings['send_welcomeEmail']), 'check_password_strength' => false, 'check_email_ban' => false, 'extra_register_vars' => array('id_group' => !empty($modSettings['bts_app_detait_gid']) ? $modSettings['bts_app_detait_gid'] : '0',),);
+    // Ok lets escape out name AND SESSION'id' ?, email and pw are created in code
+    $regOptions = array('interface' => 'guest', 'auth_method' => 'password', 'username' => $user, 'email' => $email, 'require' => 'nothing', 'password' => $pass, 'password_check' => $pass, 'password_salt' => substr(md5(mt_rand()), 0, 4), 'send_welcome_email' => !empty($modSettings['send_welcomeEmail']), 'check_password_strength' => false, 'check_email_ban' => false, 'extra_register_vars' => array('id_group' => !empty($modSettings['bts_app_detait_gid']) ? $modSettings['bts_app_detait_gid'] : '0',),);
 
     // ok if not registered on blockchain but it is bitshares login, try alt membergroup
     if (isset($_SESSION['bitsharesdata']['bitsharesregistered']) && (!$_SESSION['bitsharesdata']['bitsharesregistered'])) {
         $regOptions['extra_register_vars'] = array('id_group' => !empty($modSettings['bts_app_detait_gid2']) ? $modSettings['bts_app_detait_gid2'] : '0',);
     }
     require_once ($sourcedir . '/Subs-Members.php');
-    $memberID = registerMember($regOptions); // TODO make sure these are both escaped properly
-    updateMemberData($memberID, array('btsid' => $_SESSION['bitshares']['id'], 'btsname' => $_SESSION['bitshares']['name'],));
+    $memberID = registerMember($regOptions);
+    updateMemberData($memberID, array('btsid' => $_SESSION['bitshares']['id'], 'btsname' => $user));
 
     synchRoboHash($memberID);
     redirectexit('action=bitshares;auth=done');
@@ -252,8 +257,8 @@ function bitshares_connect() {
             redirectexit('action=bitshares;area=logsync;nt;u=' . $member_load['real_name'] . '');
         }
         $pass = bitshares_createRandomPassword(12,15);
-        $user = $_SESSION['bitshares']['name'];
-        $email = $_POST['email'];
+        $user = un_htmlspecialchars($_SESSION['bitshares']['name']);
+        $email = un_htmlspecialchars($_POST['email']);
 
         if (empty($_POST['email'])) {
             // So the SMF code has a hardcoded regex that checks every email and also checks empty(email)
@@ -261,24 +266,28 @@ function bitshares_connect() {
             // So our solution is to allow a user to submit a blank email an we stuff in an email that can never be legal
             $email = bitshares_createRandomPassword(10,3).'@thiscanneverbeavaliddomainifyouwanttochangeyouremailtosomethingvalidpleasechangeit.com';
         }
-        // TODO these are supposed to be escaped for call to registerMember and updateMemberData
+
+        // user = ESCAPE, pass = created in script , email = ESCAPE
         $regOptions = array('interface' => 'guest', 'auth_method' => 'password', 'username' => $user, 'email' => $email, 'require' => 'nothing', 'password' => $pass, 'password_check' => $pass, 'password_salt' => substr(md5(mt_rand()), 0, 4), 'send_welcome_email' => !empty($modSettings['send_welcomeEmail']), 'check_password_strength' => false, 'check_email_ban' => false, 'extra_register_vars' => array('id_group' => !empty($modSettings['bts_app_detait_gid']) ? $modSettings['bts_app_detait_gid'] : '0',),);
         // ok if not registered on blockchain but it is bitshares login, try alt membergroup
+
         if (isset($_SESSION['bitsharesdata']['bitsharesregistered']) && (!$_SESSION['bitsharesdata']['bitsharesregistered'])) {
             $regOptions['extra_register_vars'] = array('id_group' => !empty($modSettings['bts_app_detait_gid2']) ? $modSettings['bts_app_detait_gid2'] : '0',);
         }
         require_once ($sourcedir . '/Subs-Members.php');
 
         $memberID = registerMember($regOptions);
-        updateMemberData($memberID, array('btsid' => $_SESSION['bitshares']['id'], 'btsname' => $_SESSION['bitshares']['name'],));
+        updateMemberData($memberID, array('btsid' => $_SESSION['bitshares']['id'], 'btsname' => $user));
 
         synchRoboHash($memberID);
         redirectexit('action=bitshares;auth=done');
     }
 }
+
 function bitshares_robohashURL() {
     return "http://robohash.org/" . $_SESSION['bitshares']['name'] . ".png";
 }
+
 function bitshares_do_agree() {
 
     global $sourcedir, $context, $boarddir, $boardurl, $user_info, $modSettings;

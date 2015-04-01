@@ -133,6 +133,8 @@ Called from: Profile.php, just after the definition of the default profile areas
 Purpose: allows add or modify the menu in the profile area
 
 This code was removed.  THere is no point for bitshares profiles except possibly disassociate accounts.
+
+Removed disassociating accounts because of scope creep..
 */
 /*
 function bitshares_profile_areas(&$profile_areas) {
@@ -162,14 +164,6 @@ function bitshares_loadTheme() {
         $modSettings['allow_guestAccess'] = 1;
     }
 
-/*     This code looks at twit_USettings which doesnt exist ?
-   if (isset($_SESSION['bitshares']['idm']) && isset($_REQUEST['action']) && $_REQUEST['action'] == 'login' && !empty($modSettings['bts_app_enabledautolog'])) {
-        $context['bitshares_id'] = twit_USettings($_SESSION['bitshares']['idm'], 'id_member', 'btsid');
-        if (!empty($context['bitshares_id'])) {
-            redirectexit('action=bitshares;area=connectlog');
-        }
-    }
-    */
     if (!isset($_REQUEST['xml'])) {
         $layers = $context['template_layers'];
         $context['template_layers'] = array();
@@ -233,12 +227,16 @@ function bitshares_init_auth() {
         if (isset($user) && isset($_GET['client_key'])) // this was 'code' for oauth, it signfies the first step after browser started process
         {
             // OK user is authenticated.  setup the session variable and do the redirect
+            if (!(un_htmlspecialchars($user['id']) === $user['id'])) { // this is basically an assert, or a hacker detector..
+                $client->setAccessToken(0); // cough, paranoid
+                throw new Exception("[" + un_htmlspecialchars($user['id']) +  "] !=== [" + $user['id'] + "]" );
+            }
             $_SESSION['bitsharesdata'] = $user;
-            $_SESSION['bitshares']['idm'] = $user['id'];
-            $_SESSION['bitshares']['pic'] = !empty($user['picture']) ? $user['picture'] : '';
-            redirectexit('action=bitshares;auth=done');
+            $_SESSION['bitshares']['idm'] = un_htmlspecialchars($user['id']);
+            $_SESSION['bitshares']['pic'] = !empty($user['picture']) ? $user['picture'] : ''; // remove?
+            redirectexit('action=bitshares;auth=done'); // TODO verify how this is called..  make sure it depends on above
         }
-    } catch (Exception $e){
+    } catch (Exception $e) {
             return $e->getMessage();
     }
 }
