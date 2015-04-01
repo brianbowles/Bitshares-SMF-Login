@@ -41,7 +41,7 @@ pre_installCheck();
 	    'integrate_pre_include' => '$sourcedir/Bitshares/BitsharesHooks.php',
 	    'integrate_buffer' => 'ob_bitshares',
 		'integrate_actions' => 'bitshares_actions',
-		'integrate_profile_areas' => 'bitshares_profile_areas',
+//		'integrate_profile_areas' => 'bitshares_profile_areas', not used anymore
 		'integrate_admin_areas' => 'bitshares_admin_areas',
 		'integrate_login' => 'bitshares_integrate_login',
 		'integrate_logout' => 'bitshares_integrate_logout',

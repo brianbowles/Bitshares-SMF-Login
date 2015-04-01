@@ -23,41 +23,31 @@ Add a rpc_user and rpc_password.  Turn enable to true.  Note the port number on 
 
 Run the client. Create a wallet and site account. Register the site account.
 
-Optional - lower the max amounts of connections for the wallet so lower server load.
+Optional - lower the max amounts of connections for the wallet so lower server load if that is an issue.
 
-Go into Sources/Bitshares/bitsharesClientApi.php and edit the following .  
-
-
-private $RPC_SERVER_PORT = 57133; // Port in httpd_endpoint
-private $RPC_SERVER_USER = "sitetest"; // this is rpc_user
-private $RPC_SERVER_PASS = "sitetestPW"; // rpc_password
-private $RPC_SERVER_WALLET = "test"; // wallet name
-private $RPC_SERVER_WALLET_PASS = "genericE55IE"; // wallet password
-private $BITSHARES_USER_NAME = "testingtoday"; // this is a registered account created on the servers wallet
+Go to the bitshares administration screen and set it up as desired.  Help is available in the popups.
 
 Make sure curl is installed 
 apt-get install php5-curl
 
-Inside Sources/includes make sure easybitcoin.php is installed - TODO clean this up
+Create a login button or copy the one out of the Package to a desired hosting location.  Change the url to reflect this inside the package.
 
+Optional - A lot of SMF installations allow users to change their username.  If you allow this a person can impersonate others by registering under a blockchain registered name then changing their name. If you want trust in the username's created into the Bitshares membergroups then this functionality will need ot be disabled.  Find this in Allow users to edit their displayed name under Admin/Configuration/General
+
+Edit loginredirect and make sure the domain listed at the bottom is correct.  (it won't be until you do it)  If you see an error - wallet_login_finish failed then look here.  
 ----- Issues 
-The admin configuration seems to have refresh issues due to caching.  The values are saved internally but will not show up then the Save button is clicked until the cache expires.
+The admin configuration seems to have refresh issues due to caching.  The values are saved internally but will not show up then the Save button is clicked until the cache expires. It is purely a display issue so very low priority.
 
-
+loginredirect.php has a hardcoded domain because it doesnt load up the full SMF environment
 
 
 TODO -
-Fix the domain reference in loginredirect.php
-Look at token cookie and exceptions
-Create a bug report after verifying behavior of the behavior requireing loginredirect.php
 
-grep through looking for changes
-gplus/gp/google/error_log at the end
+Create a bug report after verifying behavior of the behavior requireing loginredirect.php
+The logs screen has a weird bts:call is that correct ?
+Havent tested it on a site with SSL
 
 TESTING LIST
-Make sure SSL works
-Make sure that you can not change the name when set to mamual login	
 
-- potential TODO 
-remove settings to config wallet and put them in BitSharesAdmin.php and modsettings
-remove the password fields from the manual login
+
+Ok create a fresh account. Fail the email login then try it again.  It created an account but gave me a strange error.

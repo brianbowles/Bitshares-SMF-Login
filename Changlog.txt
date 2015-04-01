@@ -5,4 +5,8 @@ fixed approval promt now it only show on first authorisation
 12/08/2014
 Refactoring done, code has a couple of bugs.
 Starting a renaming.  Renaming all GPlus to BItshares, gp to bts.
-
+12/18/2014
+misc.
+Have reformatted code.
+Added setting to now register 
+Tried to remove includes from top directory + config.php

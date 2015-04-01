@@ -24,7 +24,8 @@
  * ***** END LICENSE BLOCK ***** */
 function template_main() {
 }
-
+/* I suspect this is dead code */
+/*
 function template_gppro() {
     global $context, $scripturl, $authUrl, $modSettings, $sc, $txt;
      bitshares_init_auth_url();   
@@ -54,12 +55,12 @@ function template_gppro() {
 				<span class="botslice"><span></span></span> 
 			</div> ';
 }
-
+*/
 function template_bitshares_logsync() {
 global $txt, $scripturl, $context;
 
     echo' 
-	<form action="', $scripturl, '?action=login2;syncgp" name="frmLogin" id="frmLogin" method="post" accept-charset="', $context['character_set'], '" ', empty($context['disable_login_hashing']) ? ' onsubmit="hashLoginPassword(this, \'' . $context['session_id'] . '\');"' : '', '>';
+	<form action="', $scripturl, '?action=login2;syncbts" name="frmLogin" id="frmLogin" method="post" accept-charset="', $context['character_set'], '" ', empty($context['disable_login_hashing']) ? ' onsubmit="hashLoginPassword(this, \'' . $context['session_id'] . '\');"' : '', '>';
 	    echo' 
 		<span class="upperframe"><span></span></span>
 	        <div class="roundframe centertext">';
@@ -123,7 +124,7 @@ echo'<form action="'.$scripturl.'?action=bitshares;area=connect;register" method
 					<strong>'.$txt['bts_bitsharesreg1'].'</strong>
 				</dt>
 				<dd>
-				<input type="text" name="real_name" value="'.$_SESSION['gplusdata']['name'] .'" readonly="readonly" style="color:#888;" />
+				<input type="text" name="real_name" value="'.$_SESSION['bitsharesdata']['name'] .'" readonly="readonly" style="color:#888;" />
 				</dd>
 			</dl>';
 	  
@@ -135,7 +136,7 @@ echo'<form action="'.$scripturl.'?action=bitshares;area=connect;register" method
 					<input type="text" name="email" value="" />
 			   </dd>
 			</dl>';
-   
+/*
       echo'<dl class="register_form" >
 			   <dt>
 					<strong>'.$txt['bts_bitsharesreg3'].'</strong>
@@ -152,7 +153,7 @@ echo'<form action="'.$scripturl.'?action=bitshares;area=connect;register" method
 			   <dd>
 					<input type="password" name="passwrd2" value="" />
 			   </dd>
-		   </dl>';
+		   </dl>';*/
 		   
 		       echo'<input type="submit" name="submit" value="'.$txt['bts_bitsharesreg5'].'" />
 			   <input type="hidden" name="accept_agreement" value="1" />';
